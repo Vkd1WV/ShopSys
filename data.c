@@ -20,13 +20,19 @@ struct _root {
 	struct _node* tail;
 	struct _node* view;
 	char type;
-	// int size;
+	// int size? // number of nodes in the structure
 };
 
 /**************************** PRIVATE FUNCTIONS *******************************/
 
-int  _sortll		(DS, void*	, char*); // sort new data into a linked list
-void _add_first_node(DS, struct _node*	); // add the first node of a structure
+int  _sortll		(DS, void*	, char*		);
+// sort new data into a linked list
+void _add_first_node(DS, struct _node*		);
+// add the first node of a structure
+void _delete_node	(const DS				);
+// delete the node pointed to by view
+void _isearch		(const DS, const char*	);
+// set the view pointer to the node with the given index
 
 /********************** ACTIONS ON WHOLE DATA STRUCTURE ***********************/
 
@@ -174,7 +180,7 @@ void* pop(const DS root) {
 	case 'l':
 	case 'c':
 		if (root->head==NULL) {
-			puts("Empty tree");
+			puts("pop(): Empty Linked List");
 			return NULL;
 		}
 		data=root->head->data;
@@ -210,7 +216,13 @@ void* dq(DS root) {
  *	record is searched by ID
  */
 int iremove(DS root, char* index) {
-	return EXIT_FAILURE;
+	_isearch(root, index);
+	if (root->view->index == NULL){
+		printf("iremove(): ERROR: %s not found.\n", index);
+		return EXIT_FAILURE;
+	}
+	_delete_node(root);
+	return EXIT_SUCCESS;
 }
 
 /**	remove a node by position
@@ -232,16 +244,10 @@ int truncate(DS root, int position) {
 /**	search for a node by index in a sorted link list and return its contents
  */
 void* iview(const DS root, const char* index){
-	if (root->head == NULL)
+	_isearch(root, index);
+	if (root->view == NULL)
 		return NULL;
-
-	root->view=root->head;
-	while (( strcmp(index,root->view->index) )>0){
-		root->view=root->view->right;
-	}
-	if(!strcmp(index,root->view->index))
-		return root->view->data;
-	return NULL;
+	return root->view->data;
 }
 
 /**	search for a node by position and return its contents
@@ -282,7 +288,7 @@ void* view_next(DS root) {
 	return root->view->data;
 }
 
-/**************************** LINK LIST FUNCTIONS *****************************/
+/***************************** PRIVATE FUNCTIONS ******************************/
 
 void _add_first_node(DS root, struct _node* node){
 	node->previous	=NULL;
@@ -291,6 +297,30 @@ void _add_first_node(DS root, struct _node* node){
 	
 	root->head		=node;
 	root->tail		=node;
+}
+
+void _isearch(const DS root, const char* index){
+	if (root->head == NULL){
+		root->view=NULL;
+		return;
+	}
+
+	root->view=root->head;
+	while (( strcmp(index,root->view->index) )>0){
+		if (root->view->right == NULL) break;
+		root->view=root->view->right;
+	}
+	if(!strcmp(index,root->view->index))
+		return;
+	root->view = NULL;
+}
+
+void _delete_node(const DS root){
+	root->view->previous->right=root->view->right;
+	root->view->right->previous=root->view->previous;
+	free(root->view);
+	root->view = NULL;
+	return;
 }
 
 /**	add new data to a link list data structure in sort order
@@ -311,6 +341,7 @@ int _sortll(DS root, void* data_pt, char* index) {
 	new_node->data=data_pt;
 	new_node->index=index;
 	new_node->left=NULL;
+	root->view=new_node;
 	
 	if (root->head == NULL) { // if the data structure is empty
 		_add_first_node(root, new_node);

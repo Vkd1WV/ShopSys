@@ -67,6 +67,7 @@ void* pop(DS);
 void* dq(DS);
 /**	de-queue the bottom record from a linked list
  */
+
 int iremove(DS, char*);
 /**	remove a record from a data structure
  *	searches for the record by index

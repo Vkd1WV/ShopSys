@@ -142,6 +142,31 @@ void add_product(DS prod_list){
 }
 
 void delete_product(DS prod_list){
+	char* prod_id;
+	Prod prod_rec;
+	
+	printf("Insert prod ID of to be deleted prod :");
+	prod_id=grabword(stdin);
+	
+	prod_rec=iview(prod_list, prod_id);
+	
+	if (prod_rec == NULL){
+		printf("\nNo such Prod ID is found\n");
+		return;
+	}
+	
+	print_prod_heading(stdout);
+	print_product(stdout, prod_rec);
+	
+	puts("Are you sure you want to delete this Product Record (y/n)?");
+	if (prompt() != 'y'){
+		puts("Canceling...");
+		return;
+	}
+	// delete the data
+	free(prod_rec);
+	// delete the node
+	iremove(prod_list, prod_id);
 	return;
 }
 
