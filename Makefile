@@ -13,6 +13,9 @@ data.o: data.c data.h
 input.o: input.c input.h
 	gcc $(options) -c input.c
 
+formatting.o: formatting.c global.h
+	gcc $(options) -c formatting.c
+
 customer.o: customer.c global.h
 	gcc $(options) -c customer.c
 owner.o: owner.c global.h
@@ -24,9 +27,9 @@ file_access.o: file_access.c global.h
 ShopSys.o: ShopSys.c global.h
 	gcc $(options) -c ShopSys.c
 
-ShopSys: data.o input.o customer.o owner.o file_access.o ShopSys.o
+ShopSys: data.o input.o customer.o owner.o file_access.o formatting.o ShopSys.o
 	gcc $(options) -o ShopSys \
-			data.o input.o customer.o owner.o file_access.o ShopSys.o
+			data.o input.o customer.o owner.o file_access.o formatting.o ShopSys.o
 
 clean:
 	rm -f $(cleanfiles)

@@ -54,6 +54,7 @@
 */
 Prod read_product(FILE* file){
 	Prod prod_rec;
+	char* temp;
 	
 	// Allocate memory
 	prod_rec=malloc(sizeof(struct Product));
@@ -73,8 +74,17 @@ Prod read_product(FILE* file){
 	// QUANTITY
 	fscanf(file, "%d", &(prod_rec->num_unit));
 	// PRICE
-	fscanf(file, "%f", &(prod_rec->price));
+	temp=grabword(file);
 	
+	// ignore the dollar sign if present
+	if (*temp == '$'){
+		free(temp);
+		temp=grabword(file);
+	}
+	
+	prod_rec->price=atof(temp);
+	free(temp);
+
 	return prod_rec;
 }
 
@@ -86,8 +96,8 @@ DS read_product_file(const char* file_name){
 	FILE* product_fd;
 	Prod new_prod_rec;
 	DS product_list; // the data structure type is provided by data.h
-	char* word;
-	int valid=1;
+	//char* word;
+	//int valid=1;
 	
 	
 	// open the product file
@@ -101,39 +111,42 @@ DS read_product_file(const char* file_name){
 	
 	// Check that the header is correct and move the file pointer to the
 	// beginning of the data
-	word=grabword(product_fd);
-	if(strcmp(word, "Product_ID")) {
-		valid=0;
-		goto skip_validation;
-	}
-	free(word);
-	word=grabword(product_fd);
-	if(strcmp(word, "Product_name")) {
-		valid=0;
-		goto skip_validation;
-	}
-	free(word);
-	word=grabword(product_fd);
-	if(strcmp(word, "Number_of_units")) {
-		valid=0;
-		goto skip_validation;
-	}
-	free(word);
-	word=grabword(product_fd);
-	if(strcmp(word, "Price_of_unit")) {
-		valid=0;
-		goto skip_validation;
-	}
-	free(word);
+/*	word=grabword(product_fd);*/
+/*	if(strcmp(word, "Product_ID")) {*/
+/*		valid=0;*/
+/*		goto skip_validation;*/
+/*	}*/
+/*	free(word);*/
+/*	word=grabword(product_fd);*/
+/*	if(strcmp(word, "Product_name")) {*/
+/*		valid=0;*/
+/*		goto skip_validation;*/
+/*	}*/
+/*	free(word);*/
+/*	word=grabword(product_fd);*/
+/*	if(strcmp(word, "Number_of_units")) {*/
+/*		valid=0;*/
+/*		goto skip_validation;*/
+/*	}*/
+/*	free(word);*/
+/*	word=grabword(product_fd);*/
+/*	if(strcmp(word, "Price_of_unit")) {*/
+/*		valid=0;*/
+/*		goto skip_validation;*/
+/*	}*/
+/*	free(word);*/
+/*	*/
+/*	skip_validation:*/
+/*	if(!valid) {*/
+/*	fclose(product_fd);*/
+/*	printf("read_product_file(): ERROR: file '%s' does not have \n\*/
+/*correct file format\n", \*/
+/*			file_name);*/
+/*	return NULL;*/
+/*	}*/
 	
-	skip_validation:
-	if(!valid) {
-	fclose(product_fd);
-	printf("read_product_file(): ERROR: file '%s' does not have \n\
-correct file format\n", \
-			file_name);
-	return NULL;
-	}
+	//eat the first line
+	free(grabline(product_fd));
 	
 	// make a link list to contain product data.
 	// Link list implementation provided by data.h
@@ -175,19 +188,10 @@ int write_product_file(const char* file_name, DS product_list){
 		return EXIT_FAILURE;
 	}
 	
-	// Make the header
-	fprintf(fd, \
-		"Product_ID\tProduct_name\tNumber_of_units\tPrice_of_unit\n");
+	print_prod_heading(fd);
 	
-	// write the data to the file for each product
-	while ((temp=pop(product_list)) != NULL) {
-		if (!( temp->ID == '\0' || temp->name == '\0' )){
-			// don't record invalid data
-			fprintf(fd, "%s\t", temp->ID);
-			fprintf(fd, "%s\t", temp->name);
-			fprintf(fd, "%d\t", temp->num_unit);
-			fprintf(fd, "%.2f\n", temp->price);
-		}
+	while ((temp=pop(product_list)) != NULL){
+		print_product(fd, temp);
 		free(temp);
 	}
 	
@@ -201,8 +205,24 @@ int write_product_file(const char* file_name, DS product_list){
  *	This function must only be accessed when the program closes
 */
 int append_transaction_file(const char* file_name, DS xaction_list){
-	file_name=file_name;
-	xaction_list=xaction_list;
+	FILE* fd;
+	Trans temp;
+	
+	// open the file
+	fd=fopen(file_name, "a");
+	if (fd == NULL){
+		printf("append_transaction_file(): There was a error opening %s for append", file_name);
+		return EXIT_FAILURE;
+	}
+	
+	print_xaction_heading(fd);
+	
+	while ((temp=pop(xaction_list)) != NULL){
+		print_xaction(fd, temp);
+		free(temp);
+	}
+	
+	fclose(fd);
 	return EXIT_SUCCESS;
 }
 

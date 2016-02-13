@@ -106,5 +106,10 @@ int prompt();
 bool owner_login();
 void owner_menu(DS, DS);
 
+void print_prod_heading(FILE*);
+void print_product(FILE*, Prod);
+void print_xaction_heading(FILE*);
+void print_xaction(FILE*, Trans);
+
 #endif
 

@@ -39,7 +39,6 @@
 
 // LOCAL FUNCTIONS
 void print_product_list(DS);
-void print_product(Prod);
 void add_product(DS);
 void delete_product(DS);
 void edit_product(DS);
@@ -98,19 +97,14 @@ void print_product_list(DS prod_list){
 	Prod product;
 	
 	(void) pview(prod_list, 0); // set the view pointer to the head
-	printf("    ID   |           NAME           | ON-HAND |  PRICE\n");
+	
+	print_prod_heading(stdout);
+	
 	while ((product=view_next(prod_list)) != NULL){
-		print_product(product);
+		print_product(stdout, product);
 	}
 }
 
-void print_product(Prod p){
-	printf("%8s | %24s | %7d | $ %6.2f\n",
-			p->ID,
-			p->name,
-			p->num_unit,
-			p->price);
-}
 
 void add_product(DS prod_list){
 	Prod new_product;
@@ -124,13 +118,21 @@ void add_product(DS prod_list){
 	printf("\nEnter new Product ID:");
 	new_product->ID=grabword(stdin);
 	
+	// make sure the product ID is unique
 	if (sort(prod_list, new_product, new_product->ID)) {
 		puts("That Product ID is already in Use:");
-		print_product(iview(prod_list, new_product->ID));
+		print_prod_heading(stdout);
+		print_product(
+			stdout,
+			iview(prod_list, new_product->ID)
+		);
 		puts("");
+		
 		free(new_product);
 		return;
 	}
+	
+	
 	printf("Enter new Product Name:");
 	new_product->name=grabword(stdin);
 	printf("Enter new Product price:");
