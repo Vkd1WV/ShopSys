@@ -1,5 +1,6 @@
 /******************************************************************************/
-// Ammon Dodson
+//	Author:	Ammon Dodson
+//			Daryan Hanshew
 //	CES202
 //	Winter 2016
 //
@@ -12,26 +13,34 @@
 //
 //	Makefile	contains build instructions
 //
-//	ShopSys.c	: main()	including main menu
-//				; prompt()	prompt user for menu inputs
+//	ShopSys.c	contains the main menu, and the menu prompt
+//		: int main()
+//		; int prompt()
+//
 //	global.h	contains type definitions, prototypes, and includes used
 //				throughout
 //
 //	file_access.c	This includes functions for reading and writing to files
-//					: read_product_file()
-//					: read_product()		called for each line of product.txt
-//					: write_product_file()
-//					: append_transaction_file()
+//		: Prod	read_product			(FILE* product_file_descriptor			);
+//		: DS	read_product_file		(const char* file_name					);
+//		: int	write_product_file		(const char* file_name, DS product_data	);
+//		: int	append_transaction_file	(const char* file_name, DS xaction_data	);
+//
+//	formatting.c	Prints out data to the screen or files
+//		: void print_prod_heading		(FILE* file_descriptor			);
+//		: void print_product			(FILE* file_descriptor, Prod p	);
+//		: void print_xaction_heading	(FILE* file_descriptor			);
+//		: void print_xaction			(FILE* file_descriptor, Trans t	);
 //
 //	owner.c		Contains the owner's menu and functions
-//				; owner_login()
-//				; owner_menu()
-//				; print_product_list()
-//				; print_product()
-//				; add_product()
-//				; delete_product()
-//				; edit_product()
-//				; print_transaction_list()
+//		: bool owner_login				();
+//		: void owner_menu				(DS product_data, DS transaction_data);
+//		: void print_product_list		(DS product_data		);
+//		: void add_product				(DS product_data		);
+//		: void delete_product			(DS product_data		);
+//		: void edit_product				(DS product_data		);
+//		: void print_transaction_list	(DS transaction_data	);
+//		: void clear_xactions			(DS transaction_data	);
 //
 /******************************************************************************/
 
@@ -50,8 +59,14 @@
  *	purchased products
  */
 
-/**	Read a single product record from a file
+/**	
 */
+
+/************************************************************/
+/*		Read a single product record from a file			*/
+/************************************************************/
+//USES:	input.h:	grabword()
+
 Prod read_product(FILE* file){
 	Prod prod_rec;
 	char* temp;
@@ -72,7 +87,10 @@ Prod read_product(FILE* file){
 	// PRODUCT NAME
 	prod_rec->name=grabword(file);
 	// QUANTITY
-	fscanf(file, "%d", &(prod_rec->num_unit));
+	if (!fscanf(file, "%d", &(prod_rec->num_unit))){
+		puts("read_product(): ERROR: in file format");
+		return NULL;
+	}
 	// PRICE
 	temp=grabword(file);
 	
@@ -87,6 +105,14 @@ Prod read_product(FILE* file){
 
 	return prod_rec;
 }
+
+/************************************************************/
+/*			Read all product record from a file				*/
+/************************************************************/
+//USES:	input.h:	grabline()
+//		data.h:		new_DS()
+//					sort()
+
 
 /**	Read the contents of products.txt and store that data in a linked list
  *	returns a pointer to the linked list
@@ -172,10 +198,17 @@ DS read_product_file(const char* file_name){
 }
 
 
-/**	Write the product data to the product.txt file.
- *	returns EXIT_FAILURE or EXIT_SUCCESS
+/************************************************************/
+/*		Write the product data to the product.txt file		*/
+/************************************************************/
+//USES:	data.h:			pop()
+//		formatting.c	print_prod_heading()
+//						print_product()
+
+
+/**	returns EXIT_FAILURE or EXIT_SUCCESS
  *	This function must only be accessed when the program closes because it
- *	clears the project data structure
+ *	clears the product data structure
 */
 int write_product_file(const char* file_name, DS product_list){
 	FILE* fd;
@@ -200,8 +233,14 @@ int write_product_file(const char* file_name, DS product_list){
 }
 
 
-/**	append new transactions to the end of transactions.txt
- *	returns EXIT_FAILURE or EXIT_SUCCESS
+/************************************************************/
+/*	append new transactions to the end of transactions.txt	*/
+/************************************************************/
+//USES:	data.h:			pop()
+//		formatting.c	print_xaction_heading()
+//						print_xaction()
+
+/**	returns EXIT_FAILURE or EXIT_SUCCESS
  *	This function must only be accessed when the program closes
 */
 int append_transaction_file(const char* file_name, DS xaction_list){

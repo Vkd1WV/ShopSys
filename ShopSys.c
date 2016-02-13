@@ -1,5 +1,6 @@
 /******************************************************************************/
-// Ammon Dodson
+//	Author:	Ammon Dodson
+//			Daryan Hanshew
 //	CES202
 //	Winter 2016
 //
@@ -12,33 +13,44 @@
 //
 //	Makefile	contains build instructions
 //
-//	ShopSys.c	: main()	including main menu
-//				; prompt()	prompt user for menu inputs
+//	ShopSys.c	contains the main menu, and the menu prompt
+//		: int main()
+//		; int prompt()
+//
 //	global.h	contains type definitions, prototypes, and includes used
-//				throughout the program
+//				throughout
 //
 //	file_access.c	This includes functions for reading and writing to files
-//					: read_product_file()
-//					: read_product()		called for each line of product.txt
-//					: write_product_file()
-//					: append_transaction_file()
+//		: Prod	read_product			(FILE* product_file_discriptor			);
+//		: DS	read_product_file		(const char* file_name					);
+//		: int	write_product_file		(const char* file_name, DS product_data	);
+//		: int	append_transaction_file	(const char* file_name, DS xaction_data	);
+//
+//	formatting.c	Prints out data to the screen or files
+//		: void print_prod_heading		(FILE* file_discriptor			);
+//		: void print_product			(FILE* file_discriptor, Prod p	);
+//		: void print_xaction_heading	(FILE* file_discriptor			);
+//		: void print_xaction			(FILE* file_discriptor, Trans t	);
 //
 //	owner.c		Contains the owner's menu and functions
-//				; owner_login()
-//				; owner_menu()
-//				; print_product_list()
-//				; print_product()
-//				; add_product()
-//				; delete_product()
-//				; edit_product()
-//				; print_transaction_list()
+//		: bool owner_login				();
+//		: void owner_menu				(DS product_data, DS transaction_data);
+//		: void print_product_list		(DS product_data		);
+//		: void add_product				(DS product_data		);
+//		: void delete_product			(DS product_data		);
+//		: void edit_product				(DS product_data		);
+//		: void print_transaction_list	(DS transaction_data	);
+//		: void clear_xactions			(DS transaction_data	);
 //
 /******************************************************************************/
 
 #include "global.h"
 
-/**	Prompt the user for simple input
- */
+/************************************************************/
+/*						The Menu Prompt						*/
+/************************************************************/
+//USES:	input.h:	grabword()
+
 int prompt(){
 	char* temp;
 	int result;
@@ -52,6 +64,17 @@ int prompt(){
 	return result;
 }
 
+/************************************************************/
+/*							MAIN							*/
+/************************************************************/
+//USES:	file_access.c:	read_product_file()
+//						write_product_file()
+//						append_transaction_file()
+//		data.h:			new_DS()
+//		owner.c:		owner_login()
+//						owner_menu()
+//		customer.c:		customer_menu()
+
 int main (int argc, const char **argv){
 	const char* product_file="product.txt";
 	const char* transaction_file="transaction.txt";
@@ -59,20 +82,15 @@ int main (int argc, const char **argv){
 	DS product_list, transaction_list;
 	// DS is a generic data structure root provided by data.o
 	
-	/************************************************************/
-	/*					Use different data files				*/
-	/************************************************************/
 	
+	// Use different product files
 	if (argc>1){
 		product_file=argv[1];
-		transaction_file=argv[2];
 	}else{
 		puts("Using default files.");
 	}
 	
-	/************************************************************/
-	/*				Read Product Data from File					*/
-	/************************************************************/
+	// Read Product Data from File
 	product_list=read_product_file(product_file);
 	if(product_list == NULL)
 		return EXIT_FAILURE;
@@ -80,10 +98,7 @@ int main (int argc, const char **argv){
 	// Create an empty transaction list
 	transaction_list=new_DS('l');
 	
-	/************************************************************/
-	/*						The Main Menu						*/
-	/************************************************************/
-	
+	// The Main Menu
 	do {
 		puts("\t         MAIN MENU");
 		puts("\t===========================");
@@ -106,10 +121,7 @@ int main (int argc, const char **argv){
 		
 	} while (menu_option != 3);
 	
-	/************************************************************/
-	/*					Saving data on Exit						*/
-	/************************************************************/
-	
+	// Saving Data on Exit
 	puts("Exiting...");
 	
 	write_product_file(product_file, product_list);

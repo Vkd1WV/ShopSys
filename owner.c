@@ -1,5 +1,6 @@
 /******************************************************************************/
-// Ammon Dodson
+//	Author:	Ammon Dodson
+//			Daryan Hanshew
 //	CES202
 //	Winter 2016
 //
@@ -12,26 +13,34 @@
 //
 //	Makefile	contains build instructions
 //
-//	ShopSys.c	: main()	including main menu
-//				; prompt()	prompt user for menu inputs
+//	ShopSys.c	contains the main menu, and the menu prompt
+//		: int main()
+//		; int prompt()
+//
 //	global.h	contains type definitions, prototypes, and includes used
 //				throughout
 //
 //	file_access.c	This includes functions for reading and writing to files
-//					: read_product_file()
-//					: read_product()		called for each line of product.txt
-//					: write_product_file()
-//					: append_transaction_file()
+//		: Prod	read_product			(FILE* product_file_descriptor			);
+//		: DS	read_product_file		(const char* file_name					);
+//		: int	write_product_file		(const char* file_name, DS product_data	);
+//		: int	append_transaction_file	(const char* file_name, DS xaction_data	);
+//
+//	formatting.c	Prints out data to the screen or files
+//		: void print_prod_heading		(FILE* file_descriptor			);
+//		: void print_product			(FILE* file_descriptor, Prod p	);
+//		: void print_xaction_heading	(FILE* file_descriptor			);
+//		: void print_xaction			(FILE* file_descriptor, Trans t	);
 //
 //	owner.c		Contains the owner's menu and functions
-//				; owner_login()
-//				; owner_menu()
-//				; print_product_list()
-//				; print_product()
-//				; add_product()
-//				; delete_product()
-//				; edit_product()
-//				; print_transaction_list()
+//		: bool owner_login				();
+//		: void owner_menu				(DS product_data, DS transaction_data);
+//		: void print_product_list		(DS product_data		);
+//		: void add_product				(DS product_data		);
+//		: void delete_product			(DS product_data		);
+//		: void edit_product				(DS product_data		);
+//		: void print_transaction_list	(DS transaction_data	);
+//		: void clear_xactions			(DS transaction_data	);
 //
 /******************************************************************************/
 
@@ -46,6 +55,10 @@ void edit_product(DS);
 void print_transaction_list(DS);
 void clear_xactions(DS);
 
+/************************************************************/
+/*						The Owner Menu						*/
+/************************************************************/
+//USES:	ShopSys.c:	prompt()
 
 void owner_menu(DS prod_list, DS xaction_list){
 	int menu_option=0;
@@ -86,6 +99,11 @@ void owner_menu(DS prod_list, DS xaction_list){
 	} while (menu_option != 7);
 }
 
+/************************************************************/
+/*						The Owner Login						*/
+/************************************************************/
+//USES:	input.h:	grabword()
+
 bool owner_login(){
 	char* temp;
 	
@@ -104,6 +122,14 @@ bool owner_login(){
 	return true;
 }
 
+/************************************************************/
+/*		Print the whole product List to the Screen			*/
+/************************************************************/
+//USES:	formatting.c:	print_prod_heading()
+//						print_product()
+//		data.h:			pview()
+//						view_next()
+
 void print_product_list(DS prod_list){
 	Prod product;
 	
@@ -116,8 +142,18 @@ void print_product_list(DS prod_list){
 	}
 }
 
+/************************************************************/
+/*						Add a New Product					*/
+/************************************************************/
+//USES: input.h:		grabword()
+//		data.h:			sort()
+//						iview()
+//		formatting.c:	print_prod_heading()
+//						print_product()
+
 void add_product(DS prod_list){
 	Prod new_product;
+	char* temp;
 	
 	new_product=malloc(sizeof(struct Product));
 	if (new_product == NULL) {
@@ -146,10 +182,28 @@ void add_product(DS prod_list){
 	printf("Enter new Product Name:");
 	new_product->name=grabword(stdin);
 	printf("Enter new Product price:");
-	scanf("%f", &(new_product->price));
+	temp=grabword(stdin);
+	new_product->price=atof(temp);
+	free(temp);
 	printf("Enter new Product Quantity on hand:");
-	scanf("%d", &(new_product->num_unit));
+	temp=grabword(stdin);
+	new_product->price=atoi(temp);
+	free(temp);
+	
+	print_prod_heading(stdout);
+	print_product(stdout, new_product);
 }
+
+/************************************************************/
+/*					Delete a Product						*/
+/************************************************************/
+//USES: input.h:		grabword()
+//		data.h:			iview()
+//						iremove()
+//		formatting.c	print_prod_heading()
+//						print_product()
+//		ShopSys.c		prompt()
+
 
 void delete_product(DS prod_list){
 	char* prod_id;
@@ -179,6 +233,15 @@ void delete_product(DS prod_list){
 	iremove(prod_list, prod_id);
 	return;
 }
+
+/************************************************************/
+/*						Edit a Product						*/
+/************************************************************/
+//USES: input.h:		grabword()
+//		data.h:			iview()
+//		formatting.c	print_prod_heading()
+//						print_product()
+//		ShopSys.c		prompt()
 
 void edit_product(DS prod_list){
 	int menu_option=0;
@@ -227,6 +290,14 @@ void edit_product(DS prod_list){
 	} while (menu_option != 3);
 }
 
+/************************************************************/
+/*				Print the Whole Transaction List			*/
+/************************************************************/
+//USES:	data.h:			pview()
+//						view_next()
+//		formatting.c:	print_xaction_heading()
+//						print_xaction()
+
 void print_transaction_list(DS xaction_list){
 	Trans xaction;
 	
@@ -238,6 +309,15 @@ void print_transaction_list(DS xaction_list){
 		print_xaction(stdout, xaction);
 	}
 }
+
+/************************************************************/
+/*				Clear All Transactions						*/
+/************************************************************/
+//USES: data.h:			isempty()
+//						pop()
+//		formatting.c:	print_transaction_list()
+//		ShopSys.c		prompt()
+
 
 void clear_xactions(DS xaction_list){
 	Trans temp;

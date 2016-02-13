@@ -1,5 +1,6 @@
 /******************************************************************************/
-// Ammon Dodson
+//	Author:	Ammon Dodson
+//			Daryan Hanshew
 //	CES202
 //	Winter 2016
 //
@@ -12,26 +13,34 @@
 //
 //	Makefile	contains build instructions
 //
-//	ShopSys.c	: main()	including main menu
-//				; prompt()	prompt user for menu inputs
+//	ShopSys.c	contains the main menu, and the menu prompt
+//		: int main()
+//		; int prompt()
+//
 //	global.h	contains type definitions, prototypes, and includes used
 //				throughout
 //
 //	file_access.c	This includes functions for reading and writing to files
-//					: read_product_file()
-//					: read_product()		called for each line of product.txt
-//					: write_product_file()
-//					: append_transaction_file()
+//		: Prod	read_product			(FILE* product_file_discriptor			);
+//		: DS	read_product_file		(const char* file_name					);
+//		: int	write_product_file		(const char* file_name, DS product_data	);
+//		: int	append_transaction_file	(const char* file_name, DS xaction_data	);
+//
+//	formatting.c	Prints out data to the screen or files
+//		: void print_prod_heading		(FILE* file_discriptor			);
+//		: void print_product			(FILE* file_discriptor, Prod p	);
+//		: void print_xaction_heading	(FILE* file_discriptor			);
+//		: void print_xaction			(FILE* file_discriptor, Trans t	);
 //
 //	owner.c		Contains the owner's menu and functions
-//				; owner_login()
-//				; owner_menu()
-//				; print_product_list()
-//				; print_product()
-//				; add_product()
-//				; delete_product()
-//				; edit_product()
-//				; print_transaction_list()
+//		: bool owner_login				();
+//		: void owner_menu				(DS product_data, DS transaction_data);
+//		: void print_product_list		(DS product_data		);
+//		: void add_product				(DS product_data		);
+//		: void delete_product			(DS product_data		);
+//		: void edit_product				(DS product_data		);
+//		: void print_transaction_list	(DS transaction_data	);
+//		: void clear_xactions			(DS transaction_data	);
 //
 /******************************************************************************/
 
@@ -42,8 +51,8 @@
 
 #include <stdlib.h> // we use the EXIT_FAILURE macros everywhere
 #include <stdio.h>
-#include "data.h"
-#include "input.h"
+#include "data.h"   // data structure library
+#include "input.h"  // input library
 
 /**************************** TYPE DEFINITIONS ********************************/
 
@@ -73,7 +82,8 @@ typedef enum {false, true} bool;
 
 
 /******************************** PROTOTYPES **********************************/
-// These are functions defined in one file and used in others
+// These are functions defined in one file and used in others so their
+// prototypes have to be here
 
 DS read_product_file(const char*);
 /**	Read the contents of products.txt and store that data in a linked list
