@@ -64,7 +64,7 @@ Prod read_product(FILE* file){
 	
 	// PRODUCT ID
 	prod_rec->ID=grabword(file);
-	if (prod_rec->ID == NULL){
+	if (prod_rec->ID == NULL ){
 		free(prod_rec);
 		return NULL;
 	}
@@ -161,11 +161,37 @@ correct file format\n", \
 
 /**	Write the product data to the product.txt file.
  *	returns EXIT_FAILURE or EXIT_SUCCESS
- *	This function must only be accessed when the program closes
+ *	This function must only be accessed when the program closes because it
+ *	clears the project data structure
 */
 int write_product_file(const char* file_name, DS product_list){
-	file_name=file_name;
-	product_list=product_list;
+	FILE* fd;
+	Prod temp;
+	
+	// open the file
+	fd=fopen(file_name, "w");
+	if (fd == NULL){
+		printf("There was a error opening %s for writting", file_name);
+		return EXIT_FAILURE;
+	}
+	
+	// Make the header
+	fprintf(fd, \
+		"Product_ID\tProduct_name\tNumber_of_units\tPrice_of_unit\n");
+	
+	// write the data to the file for each product
+	while ((temp=pop(product_list)) != NULL) {
+		if (!( temp->ID == '\0' || temp->name == '\0' )){
+			// don't record invalid data
+			fprintf(fd, "%s\t", temp->ID);
+			fprintf(fd, "%s\t", temp->name);
+			fprintf(fd, "%d\t", temp->num_unit);
+			fprintf(fd, "%.2f\n", temp->price);
+		}
+		free(temp);
+	}
+	
+	fclose(fd);
 	return EXIT_SUCCESS;
 }
 

@@ -14,26 +14,30 @@
  */
 char* grabword (FILE* source){
 	// temporary character, position in the array, current size of the array
-	int c, i, size=ARRAY_SIZE, state;
+	int i, size=ARRAY_SIZE, state;
 	// a variable array to temporarily hold the word
 	char* store;
 	// an array to return to caller
 	char* output;
+	char c;
 	
-	// allocate and initialize store
+	if (source == NULL)
+		return NULL;
+	
+	// allocate
 	if ( (store=malloc(ARRAY_SIZE)) == NULL ) {
 		puts("ERROR: malloc() failed.");
 		return NULL;
 	}
-	for(i=0; i<ARRAY_SIZE; i++)
-		store[i]=0;
+	// initialize
+	for(i=0; i<ARRAY_SIZE; i++) store[i]=0;
 	
 	state = OUT; // assume that the file pointer is not already in a word
 	i=0;
 	// while c is not whitespace read it into store
 	do {
 		c = fgetc(source);
-		if (c == ' ' || c == '\n' || c == '\t'){
+		if (c == ' ' || c == '\n' || c == '\t' || c == '\r' || c == EOF){
 			if (state == IN)
 				break; // stop when we find whitespace at the end of the word
 		} else {
@@ -51,7 +55,7 @@ char* grabword (FILE* source){
 		}
 	} while (!feof(source));
 	
-	if (store=='\0') { // if nothing was read
+	if (*store == '\0') { // if nothing was read
 		free(store);
 		return NULL;
 	}
@@ -89,7 +93,7 @@ char* grabline(FILE* source) {
 	i=0;
 	// while c is not whitespace read it into store
 	while ((c = fgetc(source)) != EOF) {
-		if (c == '\n'){
+		if (c == '\n' || c == '\r' || c == EOF){
 			if (state == IN)
 				break; // stop when we find whitespace at the end of the word
 		} else {

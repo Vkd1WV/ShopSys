@@ -184,7 +184,7 @@ void* pop(const DS root) {
 		if (root->head->right == NULL){
 			root->head=NULL;
 		}else{
-			root->head->right->previous=root->head->previous;
+			root->head->right->previous=NULL;
 			root->head=root->head->right;
 		}
 		free(temp);
@@ -262,6 +262,11 @@ void* pview(const DS root, int position){
  *	return to the first member with pview(root, 1);
  */
 void* view_next(DS root) {
+	if (root->head == NULL){ // empty data structure
+		puts("No Data in Structure");
+		return NULL;
+	}
+	
 	if (root->view == NULL){
 		root->view = root->head;
 		return root->view->data;
