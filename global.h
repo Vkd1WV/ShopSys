@@ -38,6 +38,15 @@
 #ifndef Global_LIST_H_INCLUDED
 #define Global_LIST_H_INCLUDED
 
+/********************************** INCLUDES **********************************/
+
+#include <stdlib.h> // we use the EXIT_FAILURE macros everywhere
+#include <stdio.h>
+#include "data.h"
+#include "input.h"
+
+/**************************** TYPE DEFINITIONS ********************************/
+
 struct Product{
 char*  ID;
 char* name;
@@ -62,28 +71,8 @@ typedef struct Transaction* Trans;
 #define FALSE 0
 typedef enum {false, true} bool;
 
-/****************************** FILE FORMATS **********************************/
 
-/**	product.txt has a header in the first line followed by one product record
- *	per line. Each product record has 4 tab-delimited fields.
- *	PRODUCT ID	PRODUCT NAME	QUANTITY ON HAND	PRICE
-*/
-
-/**	transaction.txt has a header in the first line followed by one transaction
- *	record per line.
- *	each transaction record has 5 tab-delimited fields:
- *	First Name	last Name	Ammount of payment	date of payment	list of
- *	purchased products
-*/
-
-/********************************** INCLUDES **********************************/
-
-#include <stdlib.h> // we use the EXIT_FAILURE macros everywhere
-#include <stdio.h>
-#include "data.h"
-#include "input.h"
-
-/********************************* FUNCTIONS **********************************/
+/******************************** PROTOTYPES **********************************/
 // These are functions defined in one file and used in others
 
 DS read_product_file(const char*);
@@ -105,6 +94,8 @@ int append_transaction_file(const char*, DS);
 int prompt();
 bool owner_login();
 void owner_menu(DS, DS);
+
+void customer_menu();
 
 void print_prod_heading(FILE*);
 void print_product(FILE*, Prod);

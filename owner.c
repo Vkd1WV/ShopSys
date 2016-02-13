@@ -35,6 +35,7 @@
 //
 /******************************************************************************/
 
+#include <string.h>
 #include "global.h"
 
 // LOCAL FUNCTIONS
@@ -43,14 +44,16 @@ void add_product(DS);
 void delete_product(DS);
 void edit_product(DS);
 void print_transaction_list(DS);
+void clear_xactions(DS);
 
 
 void owner_menu(DS prod_list, DS xaction_list){
 	int menu_option=0;
 	
 	do {
-		puts("\t            OWNER MENU");
-		puts("\t            ==========");
+		puts("");
+		puts("\t             OWNER MENU");
+		puts("\t======================================");
 		puts("\t1. List Products for Sale");
 		puts("\t2. Add a New Product");
 		puts("\t3. Delete a Product");
@@ -72,31 +75,39 @@ void owner_menu(DS prod_list, DS xaction_list){
 			delete_product(prod_list);
 			break;
 		case 4: // EDIT AN EXISTING PRODUCT
-			printf("Enter ID of the Product to edit");
-			
-			//owner_sub_menu();
+			edit_product(prod_list);
 			break;
 		case 5: // View Outstanding Transactions
+			print_transaction_list(xaction_list);
 			break;
 		case 6: // Delete All Outstanding Transactions
-			printf("Are you sure you want to Delete all outstanding transactions?\nThis action cannot be undone (y/n):");
-			prompt();
+			clear_xactions(xaction_list);
 		}
 	} while (menu_option != 7);
 }
 
 bool owner_login(){
+	char* temp;
+	
 	printf("username:");
-	grabword(stdin);
+	temp=grabword(stdin);
+	if (strcmp(temp,"owner"))
+		return false;
+	free(temp);
+	
 	printf("password:");
-	grabword(stdin);
+	temp=grabword(stdin);
+	if (strcmp(temp,"password"))
+		return false;
+	free(temp);
+	
 	return true;
 }
 
 void print_product_list(DS prod_list){
 	Prod product;
 	
-	(void) pview(prod_list, 0); // set the view pointer to the head
+	(void) pview(prod_list, 0); // set the view pointer to NULL
 	
 	print_prod_heading(stdout);
 	
@@ -104,7 +115,6 @@ void print_product_list(DS prod_list){
 		print_product(stdout, product);
 	}
 }
-
 
 void add_product(DS prod_list){
 	Prod new_product;
@@ -145,13 +155,13 @@ void delete_product(DS prod_list){
 	char* prod_id;
 	Prod prod_rec;
 	
-	printf("Insert prod ID of to be deleted prod :");
+	printf("Enter the ID of the Product to Delete: ");
 	prod_id=grabword(stdin);
 	
 	prod_rec=iview(prod_list, prod_id);
 	
 	if (prod_rec == NULL){
-		printf("\nNo such Prod ID is found\n");
+		printf("\nThat Product Does not Exist\n");
 		return;
 	}
 	
@@ -172,10 +182,27 @@ void delete_product(DS prod_list){
 
 void edit_product(DS prod_list){
 	int menu_option=0;
+	char* prod_id;
+	char* input;
+	Prod prod_rec;
+	
+	printf("Enter the ID of the Product to Edit: ");
+	prod_id=grabword(stdin);
+	
+	prod_rec=iview(prod_list, prod_id);
+	
+	if (prod_rec == NULL){
+		printf("\nThat Product Does not Exist\n");
+		return;
+	}
 	
 	do {
-		puts("\t          EDIT");
-		puts("\t          ====");
+		puts("");
+		printf("\tEditing: %s\n", prod_rec->name);
+		print_prod_heading(stdout);
+		print_product(stdout, prod_rec);
+		
+		puts("\t============================");
 		puts("\t1. Edit the Quantity on Hand");
 		puts("\t2. Change the Price");
 		puts("\t3. Back");
@@ -184,10 +211,53 @@ void edit_product(DS prod_list){
 		
 		switch (menu_option){
 		case 1:
+			printf("Enter the new Quantity:");
+			
+			input=grabword(stdin);
+			prod_rec->num_unit=atoi(input);
+			free(input);
+			break;
 		case 2:
-			puts("Not Implemented");
+			printf("Enter the new Price:");
+			
+			input=grabword(stdin);
+			prod_rec->price=atof(input);
+			free(input);
 		}
 	} while (menu_option != 3);
+}
+
+void print_transaction_list(DS xaction_list){
+	Trans xaction;
+	
+	(void) pview(xaction_list, 0); // set the view pointer to NULL
+	
+	print_xaction_heading(stdout);
+	
+	while ((xaction=view_next(xaction_list)) != NULL){
+		print_xaction(stdout, xaction);
+	}
+}
+
+void clear_xactions(DS xaction_list){
+	Trans temp;
+	
+	if(isempty(xaction_list)){
+		puts("There are no Outstanding Transactions");
+		return;
+	}
+	
+	print_transaction_list(xaction_list);
+	
+	puts("Are you sure you want to delete all outstanding transactions (y/n)?");
+	if (prompt() != 'y'){
+		puts("Canceling...");
+		return;
+	}
+	
+	while((temp=pop(xaction_list)) != NULL)
+		free(temp);
+	return;
 }
 
 

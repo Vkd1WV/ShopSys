@@ -4,10 +4,14 @@
 
 #include "data.h"
 
+// Convenience Definitions
+#define TRUE 1
+#define FALSE 0
+
 /**************************** PRIVATE STRUCTURES ******************************/
 
 struct _node {
-	const void* data;
+	void* data;
 	const char* index;
 	// data type?
 	struct _node* previous;
@@ -33,6 +37,8 @@ void _delete_node	(const DS				);
 // delete the node pointed to by view
 void _isearch		(const DS, const char*	);
 // set the view pointer to the node with the given index
+void _psearch		(const DS, const int	);
+// set the view pointer to the node with the given position
 
 /********************** ACTIONS ON WHOLE DATA STRUCTURE ***********************/
 
@@ -76,10 +82,10 @@ DS new_DS(const char type){
 	return new_structure;
 }
 
-/**	delete an entire data structure, freeing all memory
- */
-int drop(DS root){
-	return EXIT_FAILURE;
+
+int isempty(DS root){
+	if (root->head == NULL && root->tail == NULL) return TRUE;
+	else return FALSE;
 }
 
 /**	Dump the entire contents of the data structure to the console
@@ -110,7 +116,7 @@ void dump(const DS root){
 
 /**	Push a new record on top of a linked list
  */
-int push(const DS root, const void* data) {
+int push(const DS root, void* data) {
 	struct _node* new_node;
 	
 	// allocate a new node
@@ -138,16 +144,38 @@ int push(const DS root, const void* data) {
 
 /**	Append a new record to the bottom of a linked list
  */
-int append(const DS root, const void* data) {
-	return EXIT_FAILURE;
+int append(const DS root, void* data) {
+	struct _node* new_node;
+	
+	// allocate a new node
+	new_node=malloc(sizeof(struct _node));
+	if (new_node == NULL){
+		puts("ERROR: malloc() returned NULL");
+		return EXIT_FAILURE;
+	}
+	
+	new_node->data=data;
+	
+	if (root->head == NULL) // this will be the first node in the list
+		_add_first_node(root, new_node);
+	else {
+		new_node->previous	=root->tail;
+		new_node->left		=NULL;
+		new_node->right		=NULL;
+		
+		root->tail->right	=new_node;
+		root->tail			=new_node;
+	}
+	
+	return EXIT_SUCCESS;
 }
 
 /**	Insert a node at some count of positions from either end of the ll
  *	positive counts from the head, negative from the tail
  */
-int insert(DS root, void* data, int position) {
-	return EXIT_FAILURE;
-}
+//int insert(DS root, void* data, int position) {
+//	return EXIT_FAILURE;
+//}
 
 /**	insert node in to the structure in sort order
  *	data must contain a char* ID used for sort ordering
@@ -189,6 +217,7 @@ void* pop(const DS root) {
 		
 		if (root->head->right == NULL){
 			root->head=NULL;
+			root->tail=NULL;
 		}else{
 			root->head->right->previous=NULL;
 			root->head=root->head->right;
@@ -209,6 +238,38 @@ void* pop(const DS root) {
 /**	de-queue the bottom record from a linked list
  */
 void* dq(DS root) {
+	void* data;
+	struct _node* temp;
+	
+	switch (root->type){
+	case 'l':
+	case 'c':
+		if (root->head==NULL) {
+			puts("dq(): Empty Linked List");
+			return NULL;
+		}
+		data=root->tail->data;
+		
+		temp=root->tail;
+		
+		if (root->tail->previous == NULL){
+			root->tail=NULL;
+			root->head=NULL;
+		}else{
+			root->tail->previous->right=NULL;
+			root->tail=root->tail->previous;
+		}
+		free(temp);
+		
+		return data;
+	case 't':
+	case 'b':
+		puts("ERROR: you can't dq() from a tree. that makes no effin' sense. retard.");
+		return NULL;
+	default:
+		puts("ERROR: invalid DS type");
+		return NULL;
+	}
 	return NULL;
 }
 
@@ -228,13 +289,13 @@ int iremove(DS root, char* index) {
 /**	remove a node by position
  *	positive counts from the head, negative from the tail
  */
-int premove(DS root, int position) {
-	return EXIT_FAILURE;
-}
+//int premove(DS root, int position) {
+//	return EXIT_FAILURE;
+//}
 
-int truncate(DS root, int position) {
-	return EXIT_FAILURE;
-}
+//int truncate(DS root, int position) {
+//	return EXIT_FAILURE;
+//}
 /**	truncate a number of nodes from the head or tail
  *	positive counts from the head, negative from the tail
  */

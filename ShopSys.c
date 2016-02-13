@@ -85,8 +85,8 @@ int main (int argc, const char **argv){
 	/************************************************************/
 	
 	do {
-		puts("\t        MAIN MENU");
-		puts("\t        =========");
+		puts("\t         MAIN MENU");
+		puts("\t===========================");
 		puts("\t1. Owner Login");
 		puts("\t2. Customer Login");
 		puts("\t3. Exit, Saving All Changes");
@@ -98,8 +98,10 @@ int main (int argc, const char **argv){
 			if (owner_login())
 				owner_menu(product_list, transaction_list);
 			else puts("Tried to break in did ye?");
+			break;
 		case 2:
-			puts("Not Implemented");
+			customer_menu();
+			break;
 		}
 		
 	} while (menu_option != 3);

@@ -27,11 +27,8 @@ DS new_DS(const char type);
  *	Returns NULL on failure
  */
 
-int drop(DS);
-/**	delete an entire data structure
- */
-int empty(const DS);
-/**	Empty the contents of a data structure without deleting the structure itself
+int isempty(DS root);
+/**	Test if the data structure is empty
  */
 
 void dump(const DS);
@@ -42,10 +39,10 @@ void dump(const DS);
 /**************************** ADD TO DATA STRUCTURE ***************************/
 
 #define nq(A,B) push(A,B)
-int push(const DS, const void*);
+int push(const DS, void*);
 /**	Push a new record on top of a linked list
  */
-int append(const DS, const void*);
+int append(const DS, void*);
 /**	Append a new record to the bottom of a linked list
  *	
  */
@@ -83,7 +80,7 @@ int truncate(DS, int);
 
 /********************** VIEW RECORD IN DATA STRUCTURE *************************/
 
-void* iview(const DS, const char*);
+void* iview(DS, const char*);
 /**	search for a node by index in a sorted link list and return a pointer to
  *	its contents
  *	does not change contents of data structure
