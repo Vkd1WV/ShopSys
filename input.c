@@ -122,3 +122,82 @@ char* grabline(FILE* source) {
 	free(store);
 	return output;
 }
+
+/**	Get the next tab, 2x space, or newline terminated string from the input stream
+ *	Discards leading and terminating whitespace
+ *	whitespace is newlines, tabs, and leading spaces
+ *	the program must free the array provided by grabfield()
+ *	returns NULL on failure
+ */
+char* grabfield(FILE* source){
+	// temporary character, position in the array, current size of the array
+	int i, size=ARRAY_SIZE;
+	int state, space_count=0;
+	// a variable array to temporarily hold the word
+	char* store;
+	// an array to return to caller
+	char* output;
+	char c;
+	
+	if (source == NULL)
+		return NULL;
+	
+	// allocate
+	if ( (store=calloc(ARRAY_SIZE, sizeof(char))) == NULL ) {
+		puts("ERROR: calloc() failed.");
+		return NULL;
+	}
+	
+	state = OUT; // assume that the file pointer is not already in a field
+	i=0;
+	
+	// while c is not EOF read it into store
+	do {
+		c = fgetc(source);
+		if (c == ' ' && state == OUT){
+			// do nothing
+		
+		} else if ( (c>='\t' && c<='\r') || c == EOF || space_count >2){
+			if (state == IN)
+				break; // stop when we find whitespace at the end of the word
+		
+		} else {
+			state = IN;
+			if (i == size-1) { // if store isn't big enough we double it.
+				if ( (store=realloc(store, size *=2)) == NULL ) {
+					puts("ERROR: realloc() failed.");
+					free(store);
+					return NULL;
+				}
+			}
+			if (c == ' ') space_count++;
+			else space_count=0;
+			
+			// store c in the array and increment i
+			store[i]=c;
+			i++;
+		}
+	} while (!feof(source));
+	
+	// get rid of any trailing spaces we might have captured
+	while(store[i-1] == ' '){
+		store[i-1]='\0';
+		i--;
+	}
+	
+	if (*store == '\0') { // if nothing was read
+		free(store);
+		return NULL;
+	}
+	
+	// create a correctly sized array to output the result
+	if ( (output=malloc(i)) == NULL ) {
+		puts("ERROR: malloc() failed.");
+		free(store);
+		return NULL;
+	}
+	strcpy(output, store);
+	free(store);
+	return output;
+}
+

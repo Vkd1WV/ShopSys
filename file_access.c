@@ -66,6 +66,7 @@
 /*		Read a single product record from a file			*/
 /************************************************************/
 //USES:	input.h:	grabword()
+//					grabfield()
 
 Prod read_product(FILE* file){
 	Prod prod_rec;
@@ -79,18 +80,17 @@ Prod read_product(FILE* file){
 	}
 	
 	// PRODUCT ID
-	prod_rec->ID=grabword(file);
+	prod_rec->ID=grabfield(file);
 	if (prod_rec->ID == NULL ){
 		free(prod_rec);
 		return NULL;
 	}
 	// PRODUCT NAME
-	prod_rec->name=grabword(file);
+	prod_rec->name=grabfield(file);
 	// QUANTITY
-	if (!fscanf(file, "%d", &(prod_rec->num_unit))){
-		puts("read_product(): ERROR: in file format");
-		return NULL;
-	}
+	temp=grabfield(file);
+	prod_rec->num_unit=atoi(temp);
+	free(temp);
 	// PRICE
 	temp=grabword(file);
 	

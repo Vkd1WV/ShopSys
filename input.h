@@ -18,5 +18,13 @@ char* grabword(FILE*);
  *	the program must free the array provided by grabword()
  *	returns NULL on failure
  */
+ 
+char* grabfield(FILE*);
+/**	Get the next tab or newline terminated string from the input stream
+ *	Discards leading and terminating whitespace
+ *	whitespace is newlines, tabs, and leading spaces
+ *	the program must free the array provided by grabfield()
+ *	returns NULL on failure
+ */
 
 #endif

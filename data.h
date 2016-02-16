@@ -31,7 +31,7 @@ int isempty(DS root);
  */
 
 void dump(const DS);
-/**	Dump the entire contents of the data structure to the console
+/**	Dump the all indexes to the console
  *	the stored data is not changed
  */
 

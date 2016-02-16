@@ -52,7 +52,7 @@
 
 void print_prod_heading(FILE* file){
 	fprintf(file,
-			"    ID               NAME             ON-HAND  UNIT PRICE\n"
+			"   ID   \t             NAME             \tON-HAND\tUNIT PRICE\n"
 	);
 }
 
@@ -67,7 +67,7 @@ void print_prod_heading(FILE* file){
 
 void print_product(FILE* file, Prod p){
 	fprintf(file,
-			"%8s   %24s   %7d    $ %6.2f\n",
+			"%8s\t%30s\t%7d\t $ %7.2f\n",
 			p->ID,
 			p->name,
 			p->num_unit,

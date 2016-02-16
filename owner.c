@@ -146,6 +146,7 @@ void print_product_list(DS prod_list){
 /*						Add a New Product					*/
 /************************************************************/
 //USES: input.h:		grabword()
+//						grabline()
 //		data.h:			sort()
 //						iview()
 //		formatting.c:	print_prod_heading()
@@ -180,7 +181,7 @@ void add_product(DS prod_list){
 	
 	
 	printf("Enter new Product Name:");
-	new_product->name=grabword(stdin);
+	new_product->name=grabline(stdin);
 	printf("Enter new Product price:");
 	temp=grabword(stdin);
 	new_product->price=atof(temp);
