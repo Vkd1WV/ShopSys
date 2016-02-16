@@ -8,6 +8,8 @@
 #define TRUE 1
 #define FALSE 0
 
+typedef enum {false, true} bool;
+
 /**************************** PRIVATE STRUCTURES ******************************/
 
 struct _node {
@@ -26,6 +28,22 @@ struct _root {
 	char type;
 	// int size? // number of nodes in the structure
 };
+
+/********************************* MESSAGES ***********************************/
+
+// ERRORS
+	// internal error
+const char* _e_noimp	="data.h: ERROR: Feature Not yet Implemented";
+const char* _e_invtype	="data.h: ERROR: invalid DS type";
+	// os error
+const char* _e_mem		="data.h: ERROR; Could not allocate more memory";
+	// caller error
+const char* _e_repeat	="data.h: ERROR: repeated index in a sorted Linked List";
+const char* _e_nsense	="data.h: ERROR: Nonsensical action for given structure type";
+
+// NOTICE
+const char* _n_empty	="data.h: NOTICE: The data structure is empty";
+const char* _n_end		="data.h: NOTICE: The end of the list has been reached";
 
 /**************************** PRIVATE FUNCTIONS *******************************/
 
@@ -56,21 +74,21 @@ DS new_DS(const char type){
 	DS new_structure;
 	
 	switch (type){
-	case 'l':
+	case 'l':		// linked list
+	case 'c':		// circular linked list
 	break;
-	case 'c':
-	case 't':
+	case 't':		// tree
 	case 'b':
-		puts("not yet implemented");
+		puts(_e_noimp);
 		return NULL;
 	default:
-		puts("ERROR: invalid DS type");
+		puts(_e_invtype);
 		return NULL;
 	}
 	
 	new_structure=malloc(sizeof (struct _root));
 	if (new_structure == NULL) {
-		puts("ERROR: malloc() returned NULL");
+		puts(_e_mem);
 		return NULL;
 	}
 	
@@ -84,7 +102,7 @@ DS new_DS(const char type){
 
 
 int isempty(DS root){
-	if (root->head == NULL && root->tail == NULL) return TRUE;
+	if (root->head == NULL) return TRUE;
 	else return FALSE;
 }
 
@@ -96,19 +114,29 @@ void dump(const DS root){
 	
 	switch (root->type){
 	case 'l':
+	
 		while(root->view != NULL) {
 			puts(root->view->index);
 			root->view=root->view->right;
 		}
-		
+	
 	break;
 	case 'c':
+	
+		if (root->view == NULL) break;
+		do {
+			puts(root->view->index);
+			root->view=root->view->right;
+		} while (root->view != root->head);
+	
+	break;
 	case 't':
 	case 'b':
-		puts("not yet implemented");
-		break;
+	
+		puts(_e_noimp);
+	break;
 	default:
-		puts("ERROR: invalid DS type");
+		puts(_e_invtype);
 	}
 }
 
@@ -122,23 +150,54 @@ int push(const DS root, void* data) {
 	// allocate a new node
 	new_node=malloc(sizeof(struct _node));
 	if (new_node == NULL){
-		puts("ERROR: malloc() returned NULL");
+		puts(_e_mem);
 		return EXIT_FAILURE;
 	}
 	
+	// assign data
 	new_node->data=data;
 	
-	if (root->head == NULL) // this will be the first node in the list
-		_add_first_node(root, new_node);
-	else {
+	if (root->head == NULL) { // this will be the first node in the structure
+		(void) _add_first_node(root, new_node);
+		return EXIT_SUCCESS;
+	}
+	
+	root->view=new_node;
+	
+	switch (root->type){
+	case 'l':
+	
 		new_node->previous	=NULL;
 		new_node->left		=NULL;
 		new_node->right		=root->head;
-		
+	
 		root->head->previous=new_node;
 		root->head			=new_node;
-	}
 	
+	break;
+	case 'c':
+	
+		new_node->previous	=root->tail;
+		new_node->left		=NULL;
+		new_node->right		=root->head;
+		
+		root->tail->right	=new_node;
+		root->head->previous=new_node;
+		root->head			=new_node;
+	
+	break;
+	case 't':
+	case 'b':
+	
+		puts(_e_noimp);
+	
+	return EXIT_FAILURE;
+	default:
+	
+		puts(_e_invtype);
+	
+	return EXIT_FAILURE;
+	}
 	return EXIT_SUCCESS;
 }
 
@@ -150,21 +209,53 @@ int append(const DS root, void* data) {
 	// allocate a new node
 	new_node=malloc(sizeof(struct _node));
 	if (new_node == NULL){
-		puts("ERROR: malloc() returned NULL");
+		puts(_e_mem);
 		return EXIT_FAILURE;
 	}
 	
+	// assign data
 	new_node->data=data;
 	
-	if (root->head == NULL) // this will be the first node in the list
-		_add_first_node(root, new_node);
-	else {
+	if (root->head == NULL) { // this will be the first node in the structure
+		(void) _add_first_node(root, new_node);
+		return EXIT_SUCCESS;
+	}
+	
+	root->view=new_node;
+	
+	switch (root->type){
+	case 'l':
+	
 		new_node->previous	=root->tail;
 		new_node->left		=NULL;
 		new_node->right		=NULL;
 		
 		root->tail->right	=new_node;
 		root->tail			=new_node;
+	
+	break;
+	case 'c':
+	
+		new_node->previous	=root->tail;
+		new_node->left		=NULL;
+		new_node->right		=root->head;
+		
+		root->tail->right	=new_node;
+		root->head->previous=new_node;
+		root->tail			=new_node;
+	
+	break;
+	case 't':
+	case 'b':
+	
+		puts(_e_noimp);
+		return EXIT_FAILURE;
+	
+	break;
+	default:
+	
+		puts(_e_invtype);
+		return EXIT_FAILURE;
 	}
 	
 	return EXIT_SUCCESS;
@@ -188,10 +279,10 @@ int sort(DS root, void* data, char* index) {
 	case 'c':
 	case 't':
 	case 'b':
-		puts("not yet implemented");
+		puts(_e_noimp);
 		return EXIT_FAILURE;
 	default:
-		puts("ERROR: invalid DS type");
+		puts(_e_invtype);
 		return EXIT_FAILURE;
 	}
 }
@@ -204,36 +295,51 @@ void* pop(const DS root) {
 	void* data;
 	struct _node* temp;
 	
+	if (root->head==NULL) {
+		puts(_n_empty);
+		return NULL;
+	}
+	
+	if(root->view == root->head)
+		root->view= NULL;
+	
+	data=root->head->data;
+	temp=root->head;
+	
 	switch (root->type){
 	case 'l':
-	case 'c':
-		if (root->head==NULL) {
-			puts("pop(): Empty Linked List");
-			return NULL;
-		}
-		data=root->head->data;
-		
-		temp=root->head;
-		
-		if (root->head->right == NULL){
+	
+		if (root->head->right == NULL){ // if this is the last node
 			root->head=NULL;
 			root->tail=NULL;
 		}else{
 			root->head->right->previous=NULL;
 			root->head=root->head->right;
 		}
-		free(temp);
-		
-		return data;
+	
+	break;
+	case 'c':
+	
+		if(root->head->right == root->head){ // if this is the last node
+			root->head=NULL;
+			root->tail=NULL;
+		}else{
+			root->tail->right			=root->head->right;
+			root->head->right->previous	=root->tail;
+			root->head					=root->head->right;
+		}
+	
+	break;
 	case 't':
 	case 'b':
-		puts("ERROR: you can't pop() the root of a tree. that makes no effin' sense. retard.");
+		puts(_e_nsense);
 		return NULL;
 	default:
-		puts("ERROR: invalid DS type");
+		puts(_e_invtype);
 		return NULL;
 	}
-	return NULL;
+	free(temp);
+	return data;
 }
 /**	de-queue the bottom record from a linked list
  */
@@ -241,36 +347,51 @@ void* dq(DS root) {
 	void* data;
 	struct _node* temp;
 	
+	if (root->tail==NULL) {
+		puts(_n_empty);
+		return NULL;
+	}
+	
+	if(root->view == root->tail)
+		root->view= NULL;
+	
+	data=root->tail->data;
+	temp=root->tail;
+	
 	switch (root->type){
 	case 'l':
-	case 'c':
-		if (root->head==NULL) {
-			puts("dq(): Empty Linked List");
-			return NULL;
-		}
-		data=root->tail->data;
-		
-		temp=root->tail;
-		
-		if (root->tail->previous == NULL){
-			root->tail=NULL;
+	
+		if (root->tail->previous == NULL){ // if this is the last node
 			root->head=NULL;
+			root->tail=NULL;
 		}else{
 			root->tail->previous->right=NULL;
 			root->tail=root->tail->previous;
 		}
-		free(temp);
-		
-		return data;
+	
+	break;
+	case 'c':
+	
+		if(root->tail->right == root->tail){ // if this is the last node
+			root->head=NULL;
+			root->tail=NULL;
+		}else{
+			root->head->previous		=root->tail->previous;
+			root->tail->previous->right	=root->head;
+			root->tail					=root->tail->previous;
+		}
+	
+	break;
 	case 't':
 	case 'b':
-		puts("ERROR: you can't dq() from a tree. that makes no effin' sense. retard.");
+		puts(_e_nsense);
 		return NULL;
 	default:
-		puts("ERROR: invalid DS type");
+		puts(_e_invtype);
 		return NULL;
 	}
-	return NULL;
+	free(temp);
+	return data;
 }
 
 /**	remove a record from a linked list
@@ -292,13 +413,6 @@ int iremove(DS root, char* index) {
 //int premove(DS root, int position) {
 //	return EXIT_FAILURE;
 //}
-
-//int truncate(DS root, int position) {
-//	return EXIT_FAILURE;
-//}
-/**	truncate a number of nodes from the head or tail
- *	positive counts from the head, negative from the tail
- */
 
 /********************** VIEW RECORD IN DATA STRUCTURE *************************/
 
@@ -330,7 +444,7 @@ void* pview(const DS root, int position){
  */
 void* view_next(DS root) {
 	if (root->head == NULL){ // empty data structure
-		puts("No Data in Structure");
+		puts(_n_empty);
 		return NULL;
 	}
 	
@@ -340,7 +454,7 @@ void* view_next(DS root) {
 	}
 	
 	if (root->view->right == NULL) {
-		puts("End of list");
+		puts(_n_end);
 		root->view = root->head;
 		return NULL;
 	}
@@ -352,12 +466,34 @@ void* view_next(DS root) {
 /***************************** PRIVATE FUNCTIONS ******************************/
 
 void _add_first_node(DS root, struct _node* node){
-	node->previous	=NULL;
-	node->left		=NULL;
-	node->right		=NULL;
-	
 	root->head		=node;
 	root->tail		=node;
+	root->view		=node;
+	
+	switch (root->type){
+	case 'c':
+	
+		node->previous	=node;
+		node->left		=NULL;
+		node->right		=node;
+	
+	break;
+	case 'l':
+	
+		node->previous	=NULL;
+		node->left		=NULL;
+		node->right		=NULL;
+	
+	break; // this will probably be the same for trees
+	case 't':
+	case 'b':
+	
+		puts(_e_noimp);
+	
+	break;
+	default:
+		puts(_e_invtype);
+	}
 }
 
 void _isearch(const DS root, const char* index){
@@ -377,8 +513,36 @@ void _isearch(const DS root, const char* index){
 }
 
 void _delete_node(const DS root){
-	root->view->previous->right=root->view->right;
-	root->view->right->previous=root->view->previous;
+	if (root->view == NULL) return;
+	
+	switch (root->type){
+	case 'l':
+	case 'c':
+	
+		if (root->view == root->head){
+			(void) pop(root);
+			return;
+		}
+		if (root->view == root->tail){
+			(void) dq(root);
+			return;
+		}
+		
+		// It we're in the middle of the list
+		root->view->previous->right=root->view->right;
+		root->view->right->previous=root->view->previous;
+	
+	break;
+	case 't':
+	case 'b':
+	
+		puts(_e_noimp);
+	
+	break;
+	default:
+		puts(_e_invtype);
+	}
+	
 	free(root->view);
 	root->view = NULL;
 	return;
@@ -391,10 +555,10 @@ int _sortll(DS root, void* data_pt, char* index) {
 	struct _node* new_node;
 	struct _node* current_position;
 	
-	// allocate memory for the new node
+	// allocate a new node
 	new_node=malloc(sizeof(struct _node));
-	if (new_node == NULL) {
-		puts("ERROR: malloc() returned NULL");
+	if (new_node == NULL){
+		puts(_e_mem);
 		return EXIT_FAILURE;
 	}
 	
@@ -429,7 +593,7 @@ int _sortll(DS root, void* data_pt, char* index) {
 	}
 	
 	if (!strcmp(index,current_position->index)) {
-		puts("ERROR: repeated index in a sorted Linked List");
+		puts(_e_repeat);
 		free(new_node);
 		return EXIT_FAILURE;
 	}

@@ -25,12 +25,12 @@ char* grabword (FILE* source){
 		return NULL;
 	
 	// allocate
-	if ( (store=malloc(ARRAY_SIZE)) == NULL ) {
-		puts("ERROR: malloc() failed.");
+	if ( (store=calloc(ARRAY_SIZE, sizeof(char))) == NULL ) {
+		puts("ERROR: calloc() failed.");
 		return NULL;
 	}
 	// initialize
-	for(i=0; i<ARRAY_SIZE; i++) store[i]=0;
+	//for(i=0; i<ARRAY_SIZE; i++) store[i]=0;
 	
 	state = OUT; // assume that the file pointer is not already in a word
 	i=0;

@@ -20,10 +20,9 @@ DS new_DS(const char type);
  *	type may be:
  *	'l' linked list. may be used as stack or queue
  *	'c' circular linked list
- *	't' sorted tree the first entry in data must be a pointer to a null-
- *	terminated index string that will be used to sort the tree entries
- *	'b' b-tree
- *	'q' quad tree
+ *	't' sorted tree
+ *	'b' b-tree?
+ *	'q' quad tree?
  *	Returns NULL on failure
  */
 
@@ -44,9 +43,8 @@ int push(const DS, void*);
  */
 int append(const DS, void*);
 /**	Append a new record to the bottom of a linked list
- *	
  */
-int insert(DS, void*, int);
+int insert(DS, void*, int); // NOT YET IMPLEMENTED
 /**	Insert a node at some count of positions from either end of the ll
  *	positive counts from the head, negative from the tail
  */
@@ -69,12 +67,8 @@ int iremove(DS, char*);
 /**	remove a record from a data structure
  *	searches for the record by index
  */
-int premove(DS, int);
+int premove(DS, int); // NOT IMPLEMENTED
 /**	remove a node by position
- *	positive counts from the head, negative from the tail
- */
-int truncate(DS, int);
-/**	truncate a number of nodes from the head or tail
  *	positive counts from the head, negative from the tail
  */
 
@@ -85,7 +79,7 @@ void* iview(DS, const char*);
  *	its contents
  *	does not change contents of data structure
  */
-void* pview(DS, int);
+void* pview(DS, int); // NOT FULLY IMPLEMENTED
 /**	search for a node by position and return its contents
  *	positive counts from the head, negative from the tail
  *	setting count to 0 returns NULL and sets the view pointer to NULL

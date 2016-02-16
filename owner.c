@@ -187,7 +187,7 @@ void add_product(DS prod_list){
 	free(temp);
 	printf("Enter new Product Quantity on hand:");
 	temp=grabword(stdin);
-	new_product->price=atoi(temp);
+	new_product->num_unit=atoi(temp);
 	free(temp);
 	
 	print_prod_heading(stdout);
