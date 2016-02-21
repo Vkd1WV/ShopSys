@@ -99,7 +99,7 @@ void print_xaction_heading(FILE* file){
 
 void print_xaction(FILE* file, Trans t){
 	fprintf(file,
-			"%10s %10s  $ %6.2f %s  %4d.%2d.%2d \n",
+			"%12s\t%12s\t $ %6.2f %s  %4d.%02d.%02d \n",
 			t->f_name,
 			t->l_name,
 			t->pay,
