@@ -281,8 +281,6 @@ int append_transaction_file(const char* file_name, DS xaction_list){
 		return EXIT_FAILURE;
 	}
 	
-	print_xaction_heading(fd);
-	
 	while ((temp=pop(xaction_list)) != NULL){
 		print_xaction(fd, temp);
 		free(temp);

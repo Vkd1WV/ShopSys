@@ -270,8 +270,6 @@ void print_transaction_list(DS xaction_list){
 	
 	(void) pview(xaction_list, 0); // set the view pointer to NULL
 	
-	print_xaction_heading(stdout);
-	
 	while ((xaction=view_next(xaction_list)) != NULL){
 		print_xaction(stdout, xaction);
 	}

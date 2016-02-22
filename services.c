@@ -145,20 +145,7 @@ void print_product(FILE* file, Prod p){
 	);
 }
 
-/************************************************************/
-/*			Print a Heading for Transaction Lists			*/
-/************************************************************/
-
-void print_xaction_heading(FILE* file){
-	fprintf(file,
-			"FIRST NAME  LAST NAME AMOUNT  ADDRESS   \n"
-	);
-}
-
-
-/**	transaction.txt has a header in the first line followed by one transaction
- *	record per line.
- *	each transaction record has 5 tab-delimited fields:
+/**	each transaction record has 5 tab-delimited fields:
  *	First Name	last Name	Ammount of payment	date of payment	list of
  *	purchased products
 */
@@ -168,14 +155,29 @@ void print_xaction_heading(FILE* file){
 /************************************************************/
 
 void print_xaction(FILE* file, Trans t){
+	Prod item;
+	
 	fprintf(file,
-			"%12s\t%12s\t $ %6.2f %s  %4d.%02d.%02d \n",
-			t->f_name,
-			t->l_name,
-			t->pay,
-			t->address,
+			"\n%4d.%02d.%02d NAME: %s, %s\n        ADDRESS: %s\n",
 			t->yy,
 			t->mm,
-			t->dd
+			t->dd,
+			t->l_name,
+			t->f_name,
+			t->address
+	);
+	if (isempty(t->items))
+		fputs("\tYour cart is empty\n", file);
+	else{
+		print_prod_heading(file);
+		pview(t->items, 0);
+		while((item=view_next(t->items)) != NULL)
+			print_product(file, item);
+	}
+	fprintf(file,
+			"========\t==============================\t=======\t========\n");
+	fprintf(file,
+			"        \t                              \t       \t $ %7.2f\n",
+			t->pay
 	);
 }

@@ -91,7 +91,6 @@ bool owner_login();
 void print_product_list		(DS				);
 void print_prod_heading		(FILE*			);
 void print_product			(FILE*, Prod	);
-void print_xaction_heading	(FILE*			);
 void print_xaction			(FILE*, Trans	);
 
 // In owner.c
