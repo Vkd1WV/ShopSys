@@ -69,7 +69,7 @@ char* l_name;
 char* address;
 float pay;
 int dd, mm, yy;
-struct Product * p;
+DS items;			// I CHANGED THIS
 };
 
 typedef struct Product* Prod;
@@ -85,32 +85,20 @@ typedef enum {false, true} bool;
 // These are functions defined in one file and used in others so their
 // prototypes have to be here
 
-DS read_product_file(const char*);
-/**	Read the contents of products.txt and store that data in a linked list
- *	returns a pointer to the linked list
- *	returns NULL on failure
- */
-
-int write_product_file(const char*, DS);
-/**	Write the product data to the product.txt file.
- *	returns EXIT_FAILURE or EXIT_SUCCESS
- */
-
-int append_transaction_file(const char*, DS);
-/**	append new transactions to the end of transactions.txt
- *	returns EXIT_FAILURE or EXIT_SUCCESS
- */
-
+// In services.c
 int prompt();
 bool owner_login();
+void print_product_list		(DS				);
+void print_prod_heading		(FILE*			);
+void print_product			(FILE*, Prod	);
+void print_xaction_heading	(FILE*			);
+void print_xaction			(FILE*, Trans	);
+
+// In owner.c
 void owner_menu(DS, DS);
 
-void customer_menu();
-
-void print_prod_heading(FILE*);
-void print_product(FILE*, Prod);
-void print_xaction_heading(FILE*);
-void print_xaction(FILE*, Trans);
+// In customer.c
+void customer_menu(DS, DS);
 
 #endif
 

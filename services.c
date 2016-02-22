@@ -8,43 +8,113 @@
 //
 /******************************* COMPONENTS ***********************************/
 //
-//	data.c data.h		stand-alone data structure library
-//	input.c input.h		stand-alone input library
-//
 //	Makefile	contains build instructions
 //
-//	ShopSys.c	contains the main menu, and the menu prompt
-//		: int main()
-//		; int prompt()
+//	data.c data.h		stand-alone data structure library
+//	input.c input.h		stand-alone input library
 //
 //	global.h	contains type definitions, prototypes, and includes used
 //				throughout
 //
-//	file_access.c	This includes functions for reading and writing to files
-//		: Prod	read_product			(FILE* product_file_discriptor			);
-//		: DS	read_product_file		(const char* file_name					);
-//		: int	write_product_file		(const char* file_name, DS product_data	);
-//		: int	append_transaction_file	(const char* file_name, DS xaction_data	);
-//
-//	formatting.c	Prints out data to the screen or files
-//		: void print_prod_heading		(FILE* file_discriptor			);
-//		: void print_product			(FILE* file_discriptor, Prod p	);
-//		: void print_xaction_heading	(FILE* file_discriptor			);
-//		: void print_xaction			(FILE* file_discriptor, Trans t	);
+//	ShopSys.c	contains the main menu and file activities
+//		: int  main						(										);
+//		: Prod read_product				(FILE* product_file_discriptor			);
+//		: DS   read_product_file		(const char* file_name					);
+//		: int  write_product_file		(const char* file_name, DS product_data	);
+//		: int  append_transaction_file	(const char* file_name, DS xaction_data	);
 //
 //	owner.c		Contains the owner's menu and functions
-//		: bool owner_login				();
 //		: void owner_menu				(DS product_data, DS transaction_data);
-//		: void print_product_list		(DS product_data		);
 //		: void add_product				(DS product_data		);
 //		: void delete_product			(DS product_data		);
 //		: void edit_product				(DS product_data		);
 //		: void print_transaction_list	(DS transaction_data	);
 //		: void clear_xactions			(DS transaction_data	);
 //
+//	customer.c	Contains the customer's menu and functions
+//		: void sort_menu		(				);
+//		: void update_cart		( Trans			);
+//		: Cart createCartItem	(char*, int, DS	);
+//		: void freeCartItems	(DS				);
+//		: void searchByName		(DS				);
+//		: void printByUnits		(DS				);
+//		: void printByPrice		(DS				);
+//		: Prod copyProd			(Prod			);
+//		: void updateProductList(DS, DS			);
+//
+//	services.c	Cotains functions used in multiple places
+//		; int  prompt				(								);
+//		: bool owner_login			(								);
+//		: void print_product_list	(DS product_data				);
+//		: void print_prod_heading	(FILE* file_discriptor			);
+//		: void print_product		(FILE* file_discriptor, Prod p	);
+//		: void print_xaction_heading(FILE* file_discriptor			);
+//		: void print_xaction		(FILE* file_discriptor, Trans t	);
+//
 /******************************************************************************/
 
 #include "global.h"
+
+#include <string.h>
+
+/************************************************************/
+/*						The Menu Prompt						*/
+/************************************************************/
+//USES:	input.h:	grabword()
+
+int prompt(){
+	char* temp;
+	int result;
+	
+	printf("ShopSys:>");
+	temp=grabword(stdin);
+	
+	if (!(result=atoi(temp)))	// If the input was not a number
+		result=*temp;			// we assume it's a letter
+	free(temp);
+	return result;
+}
+
+/************************************************************/
+/*						The Owner Login						*/
+/************************************************************/
+//USES:	input.h:	grabword()
+
+bool owner_login(){
+	char* temp;
+	
+	printf("username:");
+	temp=grabword(stdin);
+	if (strcmp(temp,"owner"))
+		return false;
+	free(temp);
+	
+	printf("password:");
+	temp=grabword(stdin);
+	if (strcmp(temp,"password"))
+		return false;
+	free(temp);
+	
+	return true;
+}
+
+/************************************************************/
+/*		Print the whole product List to the Screen			*/
+/************************************************************/
+//USES:	data.h:			pview()
+//						view_next()
+
+void print_product_list(DS prod_list){
+	Prod product;
+	
+	(void) pview(prod_list, 0); // set the view pointer to NULL
+	
+	print_prod_heading(stdout);
+	
+	while ((product=view_next(prod_list)) != NULL){
+		print_product(stdout, product);
+	}
+}
 
 /************************************************************/
 /*			print a heading for product lists				*/

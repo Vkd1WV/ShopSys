@@ -8,72 +8,67 @@
 //
 /******************************* COMPONENTS ***********************************/
 //
-//	data.c data.h		stand-alone data structure library
-//	input.c input.h		stand-alone input library
-//
 //	Makefile	contains build instructions
 //
-//	ShopSys.c	contains the main menu, and the menu prompt
-//		: int main()
-//		; int prompt()
+//	data.c data.h		stand-alone data structure library
+//	input.c input.h		stand-alone input library
 //
 //	global.h	contains type definitions, prototypes, and includes used
 //				throughout
 //
-//	file_access.c	This includes functions for reading and writing to files
-//		: Prod	read_product			(FILE* product_file_discriptor			);
-//		: DS	read_product_file		(const char* file_name					);
-//		: int	write_product_file		(const char* file_name, DS product_data	);
-//		: int	append_transaction_file	(const char* file_name, DS xaction_data	);
-//
-//	formatting.c	Prints out data to the screen or files
-//		: void print_prod_heading		(FILE* file_discriptor			);
-//		: void print_product			(FILE* file_discriptor, Prod p	);
-//		: void print_xaction_heading	(FILE* file_discriptor			);
-//		: void print_xaction			(FILE* file_discriptor, Trans t	);
+//	ShopSys.c	contains the main menu and file activities
+//		: int  main						(										);
+//		: Prod read_product				(FILE* product_file_discriptor			);
+//		: DS   read_product_file		(const char* file_name					);
+//		: int  write_product_file		(const char* file_name, DS product_data	);
+//		: int  append_transaction_file	(const char* file_name, DS xaction_data	);
 //
 //	owner.c		Contains the owner's menu and functions
-//		: bool owner_login				();
 //		: void owner_menu				(DS product_data, DS transaction_data);
-//		: void print_product_list		(DS product_data		);
 //		: void add_product				(DS product_data		);
 //		: void delete_product			(DS product_data		);
 //		: void edit_product				(DS product_data		);
 //		: void print_transaction_list	(DS transaction_data	);
 //		: void clear_xactions			(DS transaction_data	);
 //
+//	customer.c	Contains the customer's menu and functions
+//		: void sort_menu		(				);
+//		: void update_cart		( Trans			);
+//		: Cart createCartItem	(char*, int, DS	);
+//		: void freeCartItems	(DS				);
+//		: void searchByName		(DS				);
+//		: void printByUnits		(DS				);
+//		: void printByPrice		(DS				);
+//		: Prod copyProd			(Prod			);
+//		: void updateProductList(DS, DS			);
+//
+//	services.c	Cotains functions used in multiple places
+//		; int  prompt				(								);
+//		: bool owner_login			(								);
+//		: void print_product_list	(DS product_data				);
+//		: void print_prod_heading	(FILE* file_discriptor			);
+//		: void print_product		(FILE* file_discriptor, Prod p	);
+//		: void print_xaction_heading(FILE* file_discriptor			);
+//		: void print_xaction		(FILE* file_discriptor, Trans t	);
+//
 /******************************************************************************/
 
 #include "global.h"
 
-/************************************************************/
-/*						The Menu Prompt						*/
-/************************************************************/
-//USES:	input.h:	grabword()
-
-int prompt(){
-	char* temp;
-	int result;
-	
-	printf("ShopSys:>");
-	temp=grabword(stdin);
-	
-	if (!(result=atoi(temp)))	// If the input was not a number
-		result=*temp;			// we assume it's a letter
-	free(temp);
-	return result;
-}
+// LOCAL FUNCTIONS
+DS   read_product_file		(const char*	);
+Prod read_product			(FILE*			);
+int  write_product_file		(const char*, DS);
+int  append_transaction_file(const char*, DS);
 
 /************************************************************/
 /*							MAIN							*/
 /************************************************************/
-//USES:	file_access.c:	read_product_file()
-//						write_product_file()
-//						append_transaction_file()
-//		data.h:			new_DS()
-//		owner.c:		owner_login()
-//						owner_menu()
-//		customer.c:		customer_menu()
+//USES:	services.c:	prompt()
+//					owner_login()
+//		data.h:		new_DS()
+//		owner.c:	owner_menu()
+//		customer.c:	customer_menu()
 
 int main (int argc, const char **argv){
 	const char* product_file="product.txt";
@@ -115,7 +110,7 @@ int main (int argc, const char **argv){
 			else puts("Tried to break in did ye?");
 			break;
 		case 2:
-			customer_menu();
+			customer_menu(product_list, transaction_list);
 			break;
 		}
 		
@@ -128,5 +123,171 @@ int main (int argc, const char **argv){
 	append_transaction_file(transaction_file, transaction_list);
 	//FIXME: do something with these return values
 	
+	return EXIT_SUCCESS;
+}
+
+/************************************************************/
+/*			Read all product record from a file				*/
+/************************************************************/
+//USES:	input.h:	grabline()
+//		data.h:		new_DS()
+//					sort()
+
+
+/**	Read the contents of products.txt and store that data in a linked list
+ *	returns a pointer to the linked list
+ *	returns NULL on failure
+*/
+DS read_product_file(const char* file_name){
+	FILE* product_fd;
+	Prod new_prod_rec;
+	DS product_list; // the data structure type is provided by data.h
+	//char* word;
+	//int valid=1;
+	
+	
+	// open the product file
+	product_fd=fopen(file_name, "r");
+	// check that file opened
+	if (product_fd == NULL) {
+		printf("read_product_file(): file '%s' could not be opened.\n",
+					file_name);
+		return NULL;
+	}
+	
+	//eat the first line
+	free(grabline(product_fd));
+	
+	// make a link list to contain product data.
+	// Link list implementation provided by data.h
+	
+	product_list=new_DS('l');
+	
+	
+	while ( !feof(product_fd) ) { // check for end of file
+	
+		new_prod_rec=read_product(product_fd); // read each product
+		if (new_prod_rec == NULL)
+			break;
+		
+		// add it to the DS
+		if(sort(product_list, new_prod_rec, new_prod_rec->ID)){
+			puts("read_product_file():ERROR in adding data to sorted DS");
+			return NULL;
+		}
+	}
+	
+	fclose(product_fd);
+	return product_list;
+}
+
+/************************************************************/
+/*		Read a single product record from a file			*/
+/************************************************************/
+//USES:	input.h:	grabword()
+//					grabfield()
+
+Prod read_product(FILE* file){
+	Prod prod_rec;
+	char* temp;
+	
+	// Allocate memory
+	prod_rec=malloc(sizeof(struct Product));
+	if ( prod_rec==NULL ) {
+		puts("read_product(): ERROR: malloc() returned NULL");
+		return NULL;
+	}
+	
+	// PRODUCT ID
+	prod_rec->ID=grabfield(file);
+	if (prod_rec->ID == NULL ){
+		free(prod_rec);
+		return NULL;
+	}
+	// PRODUCT NAME
+	prod_rec->name=grabfield(file);
+	// QUANTITY
+	temp=grabfield(file);
+	prod_rec->num_unit=atoi(temp);
+	free(temp);
+	// PRICE
+	temp=grabword(file);
+	
+	// ignore the dollar sign if present
+	if (*temp == '$'){
+		free(temp);
+		temp=grabword(file);
+	}
+	
+	prod_rec->price=atof(temp);
+	free(temp);
+
+	return prod_rec;
+}
+
+/************************************************************/
+/*		Write the product data to the product.txt file		*/
+/************************************************************/
+//USES:	data.h:			pop()
+//		formatting.c	print_prod_heading()
+//						print_product()
+
+
+/**	returns EXIT_FAILURE or EXIT_SUCCESS
+ *	This function must only be accessed when the program closes because it
+ *	clears the product data structure
+*/
+int write_product_file(const char* file_name, DS product_list){
+	FILE* fd;
+	Prod temp;
+	
+	// open the file
+	fd=fopen(file_name, "w");
+	if (fd == NULL){
+		printf("There was a error opening %s for writting", file_name);
+		return EXIT_FAILURE;
+	}
+	
+	print_prod_heading(fd);
+	
+	while ((temp=pop(product_list)) != NULL){
+		print_product(fd, temp);
+		free(temp);
+	}
+	
+	fclose(fd);
+	return EXIT_SUCCESS;
+}
+
+
+/************************************************************/
+/*	append new transactions to the end of transactions.txt	*/
+/************************************************************/
+//USES:	data.h:			pop()
+//		formatting.c	print_xaction_heading()
+//						print_xaction()
+
+/**	returns EXIT_FAILURE or EXIT_SUCCESS
+ *	This function must only be accessed when the program closes
+*/
+int append_transaction_file(const char* file_name, DS xaction_list){
+	FILE* fd;
+	Trans temp;
+	
+	// open the file
+	fd=fopen(file_name, "a");
+	if (fd == NULL){
+		printf("append_transaction_file(): There was a error opening %s for append", file_name);
+		return EXIT_FAILURE;
+	}
+	
+	print_xaction_heading(fd);
+	
+	while ((temp=pop(xaction_list)) != NULL){
+		print_xaction(fd, temp);
+		free(temp);
+	}
+	
+	fclose(fd);
 	return EXIT_SUCCESS;
 }

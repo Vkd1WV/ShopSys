@@ -4,7 +4,7 @@
 
 
 cleanfiles=*.out *.o ShopSys
-options=-Wall -Wextra -pedantic -std=c11 -O2
+options=-Wall -Wextra -pedantic -std=c11 -g
 
 all: ShopSys
 
@@ -13,23 +13,20 @@ data.o: data.c data.h
 input.o: input.c input.h
 	gcc $(options) -c input.c
 
-formatting.o: formatting.c global.h
-	gcc $(options) -c formatting.c
+services.o: services.c global.h
+	gcc $(options) -c services.c
 
-customer.o: customer.c global.h
-	gcc $(options) -c customer.c
 owner.o: owner.c global.h
 	gcc $(options) -c owner.c
-
-file_access.o: file_access.c global.h
-	gcc $(options) -c file_access.c
+customer.o: customer.c global.h
+	gcc $(options) -c customer.c
 
 ShopSys.o: ShopSys.c global.h
 	gcc $(options) -c ShopSys.c
 
-ShopSys: data.o input.o customer.o owner.o file_access.o formatting.o ShopSys.o
+ShopSys: data.o input.o services.o owner.o customer.o ShopSys.o
 	gcc $(options) -o ShopSys \
-			data.o input.o customer.o owner.o file_access.o formatting.o ShopSys.o
+			data.o input.o services.o owner.o customer.o ShopSys.o
 
 clean:
 	rm -f $(cleanfiles)
