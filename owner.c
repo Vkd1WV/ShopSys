@@ -58,11 +58,12 @@
 
 // LOCAL FUNCTIONS
 
-void add_product			(DS);
-void delete_product			(DS);
-void edit_product			(DS);
-void print_transaction_list	(DS);
-void clear_xactions			(DS);
+void print_file            (const char*);
+void add_product           (DS         );
+void delete_product        (DS         );
+void edit_product          (DS         );
+void print_transaction_list(DS         );
+void clear_xactions        (DS         );
 
 /************************************************************/
 /*						The Owner Menu						*/
@@ -80,9 +81,11 @@ void owner_menu(DS prod_list, DS xaction_list){
 		puts("\t2. Add a New Product");
 		puts("\t3. Delete a Product");
 		puts("\t4. Edit an Existing Product");
-		puts("\t5. View Outstanding Transactions");
-		puts("\t6. Delete All Outstanding Transactions");
-		puts("\t7. Exit to Main Menu");
+		puts("\t5. View Recent Transactions");
+		puts("\t6. Delete Recent Transactions");
+		puts("\t7. View All Transactions");
+		puts("\t8. Delete All Transactions");
+		puts("\t9. Exit to Main Menu");
 		
 		menu_option=prompt();
 		
@@ -104,8 +107,29 @@ void owner_menu(DS prod_list, DS xaction_list){
 			break;
 		case 6: // Delete All Outstanding Transactions
 			clear_xactions(xaction_list);
+			break;
+		case 7: // View All Transactions
+			print_transaction_list(xaction_list);
+			print_file(TRANSACTION_FILE);
+			break;
+		case 8: // Delete All Transactions
+			clear_xactions(xaction_list);
+			fclose(fopen(TRANSACTION_FILE, "w"));
 		}
-	} while (menu_option != 7);
+	} while (menu_option != 9);
+}
+
+/************************************************************/
+/*               Print the Contents of a File               */
+/************************************************************/
+
+void print_file(const char* filename){
+	FILE* fd;
+	
+	fd=fopen(filename, "r");
+	while (!feof(fd))
+		putchar(fgetc(fd));
+	fclose(fd);
 }
 
 /************************************************************/

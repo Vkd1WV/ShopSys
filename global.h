@@ -99,5 +99,8 @@ void owner_menu(DS, DS);
 // In customer.c
 void customer_menu(DS, DS);
 
+
+#define TRANSACTION_FILE "transaction.txt"
+
 #endif
 
