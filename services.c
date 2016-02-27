@@ -17,11 +17,11 @@
 //				throughout
 //
 //	ShopSys.c	contains the main menu and file activities
-//		: int  main						(										);
-//		: Prod read_product				(FILE* product_file_discriptor			);
-//		: DS   read_product_file		(const char* file_name					);
-//		: int  write_product_file		(const char* file_name, DS product_data	);
-//		: int  append_transaction_file	(const char* file_name, DS xaction_data	);
+//   : int  main                   (int argc             , const char **argv);
+//   : Prod read_product           (FILE* product_file_discriptor			);
+//   : DS   read_product_file      (const char* file_name					);
+//   : int  write_product_file     (const char* file_name, DS product_data);
+//   : int  append_transaction_file(const char* file_name, DS xaction_data);
 //
 //	owner.c		Contains the owner's menu and functions
 //		: void owner_menu				(DS product_data, DS transaction_data);
@@ -76,29 +76,6 @@ int prompt(){
 }
 
 /************************************************************/
-/*						The Owner Login						*/
-/************************************************************/
-//USES:	input.h:	grabword()
-
-bool owner_login(){
-	char* temp;
-	
-	printf("username:");
-	temp=grabword(stdin);
-	if (strcmp(temp,"owner"))
-		return false;
-	free(temp);
-	
-	printf("password:");
-	temp=grabword(stdin);
-	if (strcmp(temp,"password"))
-		return false;
-	free(temp);
-	
-	return true;
-}
-
-/************************************************************/
 /*		Print the whole product List to the Screen			*/
 /************************************************************/
 //USES:	data.h:			pview()
@@ -122,7 +99,7 @@ void print_product_list(DS prod_list){
 
 void print_prod_heading(FILE* file){
 	fprintf(file,
-			"   ID   \t             NAME             \tON-HAND\tUNIT PRICE\n"
+			"   ID   \t             NAME             \tQUANTITY\tUNIT PRICE\n"
 	);
 }
 
@@ -137,7 +114,7 @@ void print_prod_heading(FILE* file){
 
 void print_product(FILE* file, Prod p){
 	fprintf(file,
-			"%8s\t%30s\t%7d\t $ %7.2f\n",
+			"%8s\t%30s\t%8d\t $ %7.2f\n",
 			p->ID,
 			p->name,
 			p->num_unit,
@@ -175,9 +152,9 @@ void print_xaction(FILE* file, Trans t){
 			print_product(file, item);
 	}
 	fprintf(file,
-			"========\t==============================\t=======\t========\n");
+			"========\t==============================\t========\t==========\n");
 	fprintf(file,
-			"        \t                              \t       \t $ %7.2f\n",
+			"        \t                              \t  TOTAL:\t $ %7.2f\n",
 			t->pay
 	);
 }

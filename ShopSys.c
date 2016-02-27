@@ -54,12 +54,14 @@
 /******************************************************************************/
 
 #include "global.h"
+#include <string.h>
 
 // LOCAL FUNCTIONS
-DS   read_product_file		(const char*	);
-Prod read_product			(FILE*			);
-int  write_product_file		(const char*, DS);
+DS   read_product_file      (const char*    );
+Prod read_product           (FILE*          );
+int  write_product_file     (const char*, DS);
 int  append_transaction_file(const char*, DS);
+bool owner_login            (               );
 
 /************************************************************/
 /*							MAIN							*/
@@ -72,7 +74,6 @@ int  append_transaction_file(const char*, DS);
 
 int main (int argc, const char **argv){
 	const char* product_file="product.txt";
-	const char* transaction_file="transaction.txt";
 	int menu_option=0;
 	DS product_list, transaction_list;
 	// DS is a generic data structure root provided by data.o
@@ -120,10 +121,33 @@ int main (int argc, const char **argv){
 	puts("Exiting...");
 	
 	write_product_file(product_file, product_list);
-	append_transaction_file(transaction_file, transaction_list);
+	append_transaction_file(TRANSACTION_FILE, transaction_list);
 	//FIXME: do something with these return values
 	
 	return EXIT_SUCCESS;
+}
+
+/************************************************************/
+/*						The Owner Login						*/
+/************************************************************/
+//USES:	input.h:	grabword()
+
+bool owner_login(){
+	char* temp;
+	
+	printf("username:");
+	temp=grabword(stdin);
+	if (strcmp(temp,"owner"))
+		return false;
+	free(temp);
+	
+	printf("password:");
+	temp=grabword(stdin);
+	if (strcmp(temp,"password"))
+		return false;
+	free(temp);
+	
+	return true;
 }
 
 /************************************************************/
