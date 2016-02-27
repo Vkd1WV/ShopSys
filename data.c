@@ -26,8 +26,18 @@ struct _root {
 	struct _node* tail;
 	struct _node* view;
 	char type;
+	int flags;
 	// int size? // number of nodes in the structure
 };
+
+/*********************************** FLAGS ************************************/
+
+//Structure type
+
+// 0000 0000 0000 0000
+
+//sorting
+//
 
 /********************************* MESSAGES ***********************************/
 
@@ -156,6 +166,7 @@ int push(const DS root, void* data) {
 	
 	// assign data
 	new_node->data=data;
+	new_node->index=NULL;
 	
 	if (root->head == NULL) { // this will be the first node in the structure
 		(void) _add_first_node(root, new_node);
@@ -215,6 +226,7 @@ int append(const DS root, void* data) {
 	
 	// assign data
 	new_node->data=data;
+	new_node->index=NULL;
 	
 	if (root->head == NULL) { // this will be the first node in the structure
 		(void) _add_first_node(root, new_node);
@@ -295,10 +307,8 @@ void* pop(const DS root) {
 	void* data;
 	struct _node* temp;
 	
-	if (root->head==NULL) {
-		puts(_n_empty);
+	if (root->head==NULL)
 		return NULL;
-	}
 	
 	if(root->view == root->head)
 		root->view= NULL;
@@ -347,10 +357,8 @@ void* dq(DS root) {
 	void* data;
 	struct _node* temp;
 	
-	if (root->tail==NULL) {
-		puts(_n_empty);
+	if (root->tail==NULL)
 		return NULL;
-	}
 	
 	if(root->view == root->tail)
 		root->view= NULL;
@@ -399,7 +407,7 @@ void* dq(DS root) {
  */
 int iremove(DS root, char* index) {
 	_isearch(root, index);
-	if (root->view->index == NULL){
+	if (root->view == NULL){
 		printf("iremove(): ERROR: %s not found.\n", index);
 		return EXIT_FAILURE;
 	}
@@ -443,10 +451,8 @@ void* pview(const DS root, int position){
  *	return to the first member with pview(root, 1);
  */
 void* view_next(DS root) {
-	if (root->head == NULL){ // empty data structure
-		puts(_n_empty);
+	if (root->head == NULL) // empty data structure
 		return NULL;
-	}
 	
 	if (root->view == NULL){
 		root->view = root->head;
@@ -454,7 +460,6 @@ void* view_next(DS root) {
 	}
 	
 	if (root->view->right == NULL) {
-		puts(_n_end);
 		root->view = root->head;
 		return NULL;
 	}
