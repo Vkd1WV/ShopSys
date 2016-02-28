@@ -4,7 +4,7 @@
 
 
 cleanfiles=*.out *.o ShopSys
-options=-Wall -Wextra -pedantic -std=c11 -g
+options=-Wall -Wextra -pedantic -std=c11 -O2
 
 all: ShopSys
 

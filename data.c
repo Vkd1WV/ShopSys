@@ -506,6 +506,9 @@ void _isearch(const DS root, const char* index){
 		root->view=NULL;
 		return;
 	}
+	
+	// FIXME this function should check that the index pointer is set. 
+	// is this a sorted list?
 
 	root->view=root->head;
 	while (( strcmp(index,root->view->index) )>0){

@@ -1,55 +1,55 @@
 /******************************************************************************/
-//	Author:	Ammon Dodson
-//			Daryan Hanshew
-//	CES202
-//	Winter 2016
+//  Author: Ammon Dodson
+//  		Daryan Hanshew
+//  CES202
+//  Winter 2016
 //
-//	This program should be built with make. A makefile has been provided.
+//  This program should be built with make. A makefile has been provided.
 //
 /******************************* COMPONENTS ***********************************/
 //
-// Makefile	contains build instructions
+// Makefile     contains build instructions
 //
 //  data.c  data.h      stand-alone data structure library
 // input.c input.h      stand-alone input library
 //
-// global.h contains type definitions, prototypes, and includes used
-//          throughout
+// global.h     contains type definitions, prototypes, and includes used
+//              throughout
 //
-// ShopSys.c	contains the main menu and file activities
-//  	: int  main                   (                                      );
-//  	: Prod read_product           (FILE* product_file_discriptor         );
-//  	: DS   read_product_file      (const char* file_name                 );
-//  	: int  write_product_file     (const char* file_name, DS product_data);
-//  	: int  append_transaction_file(const char* file_name, DS xaction_data);
+// ShopSys.c    contains the main menu and file activities
+//   int  main                   (                                      )
+//   Prod read_product           (FILE* product_file_discriptor         )
+//   DS   read_product_file      (const char* file_name                 )
+//   int  write_product_file     (const char* file_name, DS product_data)
+//   int  append_transaction_file(const char* file_name, DS xaction_data)
 //
-// owner.c		Contains the owner's menu and functions
-//  	: void owner_menu            (DS product_data    , DS transaction_data);
-//  	: void add_product           (DS product_data                         );
-//  	: void delete_product        (DS product_data                         );
-//  	: void edit_product          (DS product_data                         );
-//  	: void print_transaction_list(DS transaction_data                     );
-//  	: void clear_xactions        (DS transaction_data                     );
+// owner.c      Contains the owner's menu and functions
+//   void owner_menu            (DS product_data    , DS transaction_data)
+//   void add_product           (DS product_data                         )
+//   void delete_product        (DS product_data                         )
+//   void edit_product          (DS product_data                         )
+//   void print_transaction_list(DS transaction_data                     )
+//   void clear_xactions        (DS transaction_data                     )
 //
-// customer.c	Contains the customer's menu and functions
-//  	: void customer_menu    (DS prod_list, DS trans_list);
-//  	: void sort_menu        (DS prod_list               );
-//  	: void update_cart      (Trans cart                 );
-//  	: void add_to_cart      (Trans cart  , DS prod_list );
-//  	: void searchByName     (DS prod_list               );
-//  	: void printByUnits     (DS prod_list               );
-//  	: void printByPrice     (DS prod_list               );
-//  	: Prod copyProd         (Prod                       );
-//  	: void updateProductList(DS, DS                     );
+// customer.c   Contains the customer's menu and functions
+//   void customer_menu    (DS prod_list, DS trans_list)
+//   void sort_menu        (DS prod_list               )
+//   void update_cart      (Trans cart                 )
+//   void add_to_cart      (Trans cart  , DS prod_list )
+//   void searchByName     (DS prod_list               )
+//   void printByUnits     (DS prod_list               )
+//   void printByPrice     (DS prod_list               )
+//   Prod copyProd         (Prod                       )
+//   void updateProductList(DS          , DS           )
 //
-// services.c	Cotains functions used in multiple places
-//  	: int  prompt               (                              );
-//  	: bool owner_login          (                              );
-//  	: void print_product_list   (DS product_data               );
-//  	: void print_prod_heading   (FILE* file_discriptor         );
-//  	: void print_product        (FILE* file_discriptor, Prod p );
-//  	: void print_xaction_heading(FILE* file_discriptor         );
-//  	: void print_xaction        (FILE* file_discriptor, Trans t);
+// services.c   Cotains functions used in multiple places
+//   int  prompt               (                              )
+//   bool owner_login          (                              )
+//   void print_product_list   (DS product_data               )
+//   void print_prod_heading   (FILE* file_discriptor         )
+//   void print_product        (FILE* file_discriptor, Prod p )
+//   void print_xaction_heading(FILE* file_discriptor         )
+//   void print_xaction        (FILE* file_discriptor, Trans t)
 //
 /******************************************************************************/
 
@@ -59,10 +59,12 @@
 #include <string.h>
 
 //LOCAL FUNCTIONS
-void cart_menu        (Trans    );
-void update_cart      (Trans    );
-void add_to_cart      (Trans, DS);
-void searchByName     (DS       );
+int cart_menu    (Trans, DS , DS);
+void update_cart (Trans         );
+void add_to_cart (Trans, DS     );
+void searchByName(DS            );
+void edit_item   (Trans, DS     );
+int checkout     (Trans, DS , DS);
 
 /*void printByUnits     (DS       );*/
 /*void printByPrice     (DS       );*/
@@ -128,7 +130,8 @@ void customer_menu(DS prod_list, DS trans_list){
 			add_to_cart(cart, prod_list);
 			break;
 		case 6: // view cart
-			cart_menu(cart);
+			if(cart_menu(cart, trans_list, prod_list) == EXIT_SUCCESS)
+				return;
 			break;
 		case 7:
 			if(!isempty(cart->items)){
@@ -151,7 +154,7 @@ void customer_menu(DS prod_list, DS trans_list){
 /************************************************************/
 //USES: services.c:	prompt()
 
-void cart_menu(Trans cart){
+int cart_menu(Trans cart, DS trans_list, DS prod_list){
 	int menu_option=0;
 	do {
 		update_cart(cart);
@@ -168,11 +171,14 @@ void cart_menu(Trans cart){
 
 		switch (menu_option){
 		case 1: // Edit Item Quantity
+			edit_item(cart, prod_list);
 			break;
 		case 2: // Checkout
-			break;
+			if(checkout(cart, prod_list, trans_list) == EXIT_SUCCESS)
+				return EXIT_SUCCESS;
 		}
 	} while (menu_option != 3);
+	return EXIT_FAILURE;
 }
 
 /************************************************************/
@@ -195,11 +201,14 @@ void update_cart(Trans cart){
 	
 	// update the total
 	cart->pay=0;
-	pview(cart->items, 0);
+	pview(cart->items, 0); // initialize the view_next pointer
 	while((product=view_next(cart->items)) != NULL){
-		if (product->num_unit <1)
+		if (product->num_unit <1){
 			iremove(cart->items, product->ID);
-		else
+			/* After removing a node the view pointer is reset so we have to */
+			/* start the process over again */
+			cart->pay=0;
+		}else
 			cart->pay += product->price * product->num_unit;
 	}
 }
@@ -224,13 +233,25 @@ void searchByName(DS prodList){
 	puts("\nResults:");
 	print_prod_heading(stdout);
 	
-	pview(prodList, 0);
+	pview(prodList, 0); // start searching from the head of the linked list
 	while((product=view_next(prodList)) != NULL)
 		if(strstr(product->name, search_term) != NULL)
 			print_product(stdout, product);
 	
 	free(search_term);
 }
+
+/************************************************************/
+/*                 Add an Item to the cart                  */
+/************************************************************/
+//USES: input.h:    grabword()
+//      data.h:     iview()
+//                  pview()
+//                  view_next()
+//                  sort()
+//      services.c: print_prod_heading()
+//                  print_product()
+
 
 void add_to_cart(Trans cart, DS prod_list){
 	char* input;
@@ -244,6 +265,13 @@ void add_to_cart(Trans cart, DS prod_list){
 	prod_rec=iview(prod_list, input);
 	if (prod_rec == NULL){
 		printf("\nThat Product Does not Exist\n");
+		return;
+	}
+	
+	// check if the item is already in the cart
+	if( iview(cart->items, input) != NULL ){
+		printf("\nThat Product is already in your cart.\n");
+		puts("You can change the quantity from the cart menu.");
 		return;
 	}
 	
@@ -274,72 +302,80 @@ void add_to_cart(Trans cart, DS prod_list){
 	sort(cart->items, new_item, new_item->ID);
 }
 
-/*void checkout(DS cart, DS productList, DS transactionList){*/
-/*	struct _node * item = cart->head;*/
-/*	*/
-/*	float price = 0;*/
-/*	while((item)!=NULL){*/
-/*		Cart item_cart = item->data;*/
-/*		fprintf(stdout,*/
-/*			"%8s   %24s   %7d    $ %6.2f\n",*/
-/*			item_cart->ID,*/
-/*			item_cart->name,*/
-/*			item_cart->num_unit,*/
-/*			item_cart->price*item_cart->num_unit*/
-/*		);*/
-/*		price += item_cart->price*item_cart->num_unit;*/
-/*		item = item->right;*/
-/*	}*/
-/*	puts("Are you sure you want to buy the Products in the cart (y/n)?");*/
-/*	if(prompt()!='y'){*/
-/*		puts("Cancelling....");*/
-/*	}else{*/
 
-/*		updateProductList(productList, cart);*/
-/*		updateTransactionList(cart, transactionList, price);*/
-/*		freeCartItems(cart);*/
-/*	}*/
-/*}*/
+/************************************************************/
+/*                 Edit an Item in the cart                 */
+/************************************************************/
+//USES: input.h:    grabword()
+//      data.h:     iview()
+//      services.c: print_prod_heading()
+//                  print_product()
 
-/*void updateProductList(DS productList, DS cartItems){*/
-/*	(void) pview(productList, 0); // set the view pointer to NULL*/
-/*	Prod product;*/
-/*	while((product=view_next(productList))!=NULL){*/
-/*		while(product!=NULL){*/
-/*			if(strcmp(product->ID, item->ID)==0){*/
-/*				product->num_unit -= item->num_unit;*/
-/*				break;*/
-/*			}*/
-/*			list = list->right;*/
-/*		}*/
-/*	}*/
 
-/*}*/
+void edit_item(Trans cart, DS prod_list){
+	char* input;
+	int num_unit;
+	Prod prod_rec, item;
+	
+	printf("\nEnter ID of the product: ");
+	input = grabword(stdin);
+	
+	// find the item
+	item=iview(cart->items, input);
+	if (item == NULL){
+		printf("\nThat Product is not in your cart.\n");
+		return;
+	}
+	
+	// Find the Product
+	prod_rec=iview(prod_list, input);
+	
+	print_prod_heading(stdout);
+	print_product(stdout, item);
+	
+	do {
+		free(input);
+		printf("\nEnter New Number of Units (enter 0 to remove item): ");
+		input=grabword(stdin);
+		num_unit = atoi(input);
+	} while (num_unit > prod_rec->num_unit);
+	
+	free(input);
+	
+	item->num_unit = num_unit;
+}
 
-/*Prod copyProd(Prod a){*/
-/*	Prod b = (Prod)malloc(sizeof(struct Product));*/
-/*	b->ID = a->ID;*/
-/*	b->name = a->name;*/
-/*	b->price = a->price;*/
-/*	b->num_unit = a->num_unit;*/
-/*	b->next = NULL;*/
-/*	//printf("New Node  %s %f %f\n", b->name, b->price, a->price);*/
-/*	return b;*/
-/*}*/
 
-/*Trans copyTrans(Trans a){
-	Trans b = (Trans)malloc(sizeof(struct Transaction));
-	b->f_name = a->f_name;
-	b->l_name = a->l_name;
-	b->address = a->address;
-	b->pay = a->pay;
-	b->dd = a->dd;
-	b->mm = a->mm;
-	b->yy = a->yy;
-	b->p = a->p;
-	b->next = NULL;
-	return b;
-}*/
+/************************************************************/
+/*                  Checkout the Customer                   */
+/************************************************************/
+//USES: services.c: prompt()
+//input.h:    grabword()
+//      
+//                  print_product()
+//      data.h:     isempty()
+//                  pview()
+//                  view_next()
+
+
+int checkout(Trans cart, DS prod_list, DS xaction_list){
+	Prod item, product;
+	
+	puts("Confirm Checkout (y/n)?");
+	if(prompt() != 'y')
+		return EXIT_FAILURE;
+	
+	// Update the product list
+	pview(cart->items, 0);
+	while((item=view_next(cart->items)) != NULL){ // for each item in the cart
+		product =  iview(prod_list, item->ID); // find the corresponding product
+		product->num_unit -= item->num_unit;   // and change its quantity
+	}
+	
+	push(xaction_list, cart);
+	return EXIT_SUCCESS;
+}
+
 
 /*void printByPrice(DS productList){*/
 /*	Prod product;*/

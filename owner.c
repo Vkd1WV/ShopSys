@@ -102,19 +102,26 @@ void owner_menu(DS prod_list, DS xaction_list){
 		case 4: // EDIT AN EXISTING PRODUCT
 			edit_product(prod_list);
 			break;
-		case 5: // View Outstanding Transactions
+		case 5: // View Recent Transactions
 			print_transaction_list(xaction_list);
 			break;
-		case 6: // Delete All Outstanding Transactions
-			clear_xactions(xaction_list);
+		case 6: // Delete All Recent Transactions
+			puts("Confirm Delete All Recent Transactions (y/n)?");
+			if (prompt() == 'y')
+				clear_xactions(xaction_list);
+			else puts("Canceling...");
 			break;
 		case 7: // View All Transactions
 			print_transaction_list(xaction_list);
 			print_file(TRANSACTION_FILE);
 			break;
 		case 8: // Delete All Transactions
-			clear_xactions(xaction_list);
-			fclose(fopen(TRANSACTION_FILE, "w"));
+			puts("Confirm Delete All Transactions (y/n)?");
+			if (prompt() == 'y'){
+				clear_xactions(xaction_list);
+				fclose(fopen(TRANSACTION_FILE, "w"));
+			}else puts("Canceling...");
+			
 		}
 	} while (menu_option != 9);
 }
@@ -124,11 +131,16 @@ void owner_menu(DS prod_list, DS xaction_list){
 /************************************************************/
 
 void print_file(const char* filename){
+	char c;
 	FILE* fd;
 	
 	fd=fopen(filename, "r");
-	while (!feof(fd))
-		putchar(fgetc(fd));
+	
+	c=fgetc(fd);
+	while (!feof(fd)){
+		putchar(c);
+		c=fgetc(fd);
+	}
 	fclose(fd);
 }
 
