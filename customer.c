@@ -63,10 +63,10 @@ void searchByName(DS prodList                               );
 void edit_item   (Trans cart , DS prod_list                 );
 int  checkout    (Trans cart , DS prod_list, DS xaction_list);
 
-void print_sorted (int (*) (Prod, Prod) , DS);
+void print_sorted (int (*) (const void*, const void*) , DS);
 
-int by_qty  (Prod first, Prod second);
-int by_price(Prod first, Prod second);
+int by_qty  (const void* first, const void* second);
+int by_price(const void* first, const void* second);
 
 
 /************************************************************/
@@ -115,10 +115,10 @@ void customer_menu(DS prod_list, DS trans_list){
 			print_product_list(prod_list);
 			break;
 		case 2: // View Products Sorted by Quantity on Hand
-			//print_sorted(&by_qty, prod_list);
+			print_sorted(&by_qty, prod_list);
 			break;
 		case 3: // View Products Sorted by Price
-			//print_sorted(&by_price, prod_list);
+			print_sorted(&by_price, prod_list);
 			break;
 		case 4: // Search for Products by Name
 			searchByName(prod_list);
@@ -380,7 +380,7 @@ int checkout(Trans cart, DS prod_list, DS xaction_list){
 //              view_next()
 
 
-void print_sorted(int (compare) (Prod, Prod), DS prod_list){
+void print_sorted(int (compare) (const void*, const void*), DS prod_list){
 	Prod* index;
 	int num_nodes;
 	
@@ -401,13 +401,18 @@ void print_sorted(int (compare) (Prod, Prod), DS prod_list){
 		}
 	}
 	
-	//qsort(index, num_nodes, sizeof(Prod), compare);
+	qsort(index, num_nodes, sizeof(Prod), compare);
+	
+	print_prod_heading(stdout);
+	for (int i=0; i<num_nodes; i++){
+		print_product(stdout, index[i]);
+	}
 }
 
-int by_qty (Prod first, Prod second){
-	return second->num_unit - first->num_unit;
+int by_qty (const void* first, const void* second){
+	return (*(Prod*) second)->num_unit - (*(Prod*) first)->num_unit;
 }
 
-int by_price (Prod first, Prod second){
-	return second->price - first->price;
+int by_price (const void* first, const void* second){
+	return (*(Prod*) second)->price - (*(Prod*) first)->price;
 }
