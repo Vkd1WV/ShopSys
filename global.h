@@ -61,6 +61,7 @@ char*  ID;
 char* name;
 int num_unit;
 float price;
+struct Product * next;
 };
 
 struct Transaction{
