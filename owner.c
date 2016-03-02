@@ -72,18 +72,18 @@ void owner_menu(DS prod_list, DS xaction_list){
 	int menu_option=0;
 	
 	do {
-		puts(""                                        );
-		puts("\t             OWNER MENU"               );
-		puts("\t======================================");
-		puts("\t1. List Products for Sale"             );
-		puts("\t2. Add a New Product"                  );
-		puts("\t3. Delete a Product"                   );
-		puts("\t4. Edit an Existing Product"           );
-		puts("\t5. View Recent Transactions"           );
-		puts("\t6. Delete Recent Transactions"         );
-		puts("\t7. View All Transactions"              );
-		puts("\t8. Delete All Transactions"            );
-		puts("\t9. Exit to Main Menu"                  );
+		puts(""                               );
+		puts("\t         OWNER MENU"          );
+		puts("\t=============================");
+		puts("\t1. List Products for Sale"    );
+		puts("\t2. Add a New Product"         );
+		puts("\t3. Delete a Product"          );
+		puts("\t4. Edit an Existing Product"  );
+		puts("\t5. View Recent Transactions"  );
+		puts("\t6. Delete Recent Transactions");
+		puts("\t7. View All Transactions"     );
+		puts("\t8. Delete All Transactions"   );
+		puts("\t9. Exit to Main Menu"         );
 		
 		menu_option=prompt();
 		
@@ -301,6 +301,9 @@ void edit_product(DS prod_list){
 
 void print_transaction_list(DS xaction_list){
 	Trans xaction;
+	
+	if (isempty(xaction_list))
+		puts("No Recent Transactions.");
 	
 	(void) pview(xaction_list, 0); // set the view pointer to NULL
 	
