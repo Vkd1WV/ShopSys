@@ -1,59 +1,57 @@
 /******************************************************************************/
-//	Author:	Ammon Dodson
-//			Daryan Hanshew
-//	CES202
-//	Winter 2016
+//  Author: Ammon Dodson
+//          Daryan Hanshew
+//  CES202
+//  Winter 2016
 //
-//	This program should be build with make. A makefile has been provided.
+//  This program should be built with make. A makefile has been provided.
 //
 /******************************* COMPONENTS ***********************************/
 //
-//	Makefile	contains build instructions
+// Makefile     contains build instructions
 //
-//	data.c data.h		stand-alone data structure library
-//	input.c input.h		stand-alone input library
+//  data.c  data.h      stand-alone data structure library
+// input.c input.h      stand-alone input library
 //
-//	global.h	contains type definitions, prototypes, and includes used
-//				throughout
+// global.h     contains type definitions, prototypes, and includes used
+//              throughout
 //
-//	ShopSys.c	contains the main menu and file activities
-//		: int  main						(										);
-//		: Prod read_product				(FILE* product_file_discriptor			);
-//		: DS   read_product_file		(const char* file_name					);
-//		: int  write_product_file		(const char* file_name, DS product_data	);
-//		: int  append_transaction_file	(const char* file_name, DS xaction_data	);
+// ShopSys.c    contains the main menu and file activities
+//   int  main                   (                                      )
+//   bool owner_login            (                                      )
+//   Prod read_product           (FILE* product_file_discriptor         )
+//   DS   read_product_file      (const char* file_name                 )
+//   int  write_product_file     (const char* file_name, DS product_data)
+//   int  append_transaction_file(const char* file_name, DS xaction_data)
 //
-//	owner.c		Contains the owner's menu and functions
-//		: void owner_menu				(DS product_data, DS transaction_data);
-//		: void add_product				(DS product_data		);
-//		: void delete_product			(DS product_data		);
-//		: void edit_product				(DS product_data		);
-//		: void print_transaction_list	(DS transaction_data	);
-//		: void clear_xactions			(DS transaction_data	);
+// owner.c      Contains the owner's menu and functions
+//   void owner_menu            (DS product_data    , DS transaction_data)
+//   void add_product           (DS product_data                         )
+//   void delete_product        (DS product_data                         )
+//   void edit_product          (DS product_data                         )
+//   void print_transaction_list(DS transaction_data                     )
+//   void clear_xactions        (DS transaction_data                     )
+//   void print_file            (const char* filename                    )
 //
-//	customer.c	Contains the customer's menu and functions
-//		: void sort_menu		(				);
-//		: void update_cart		( Trans			);
-//		: Cart createCartItem	(char*, int, DS	);
-//		: void freeCartItems	(DS				);
-//		: void searchByName		(DS				);
-//		: void printByUnits		(DS				);
-//		: void printByPrice		(DS				);
-//		: Prod copyProd			(Prod			);
-//		: void updateProductList(DS, DS			);
+// customer.c   Contains the customer's menu and functions
+//   void customer_menu(DS prod_list, DS trans_list               )
+//   int cart_menu     (Trans cart  , DS prod_list , DS trans_list)
+//   void update_cart  (Trans cart                                )
+//   void add_to_cart  (Trans cart  , DS prod_list                )
+//   void searchByName (DS prod_list                              )
+//   void edit_item    (Trans cart  , DS prod_list                )
+//   int checkout      (Trans cart  , DS prod_list , DS trans_list)
 //
-//	services.c	Cotains functions used in multiple places
-//		; int  prompt				(								);
-//		: bool owner_login			(								);
-//		: void print_product_list	(DS product_data				);
-//		: void print_prod_heading	(FILE* file_discriptor			);
-//		: void print_product		(FILE* file_discriptor, Prod p	);
-//		: void print_xaction_heading(FILE* file_discriptor			);
-//		: void print_xaction		(FILE* file_discriptor, Trans t	);
+// services.c   Cotains functions used in multiple places
+//   int  prompt               (                              )
+//   void print_product_list   (DS product_data               )
+//   void print_prod_heading   (FILE* file_discriptor         )
+//   void print_product        (FILE* file_discriptor, Prod p )
+//   void print_xaction_heading(FILE* file_discriptor         )
+//   void print_xaction        (FILE* file_discriptor, Trans t)
 //
 /******************************************************************************/
 
-#include <string.h>
 #include "global.h"
 
 // LOCAL FUNCTIONS
@@ -74,18 +72,18 @@ void owner_menu(DS prod_list, DS xaction_list){
 	int menu_option=0;
 	
 	do {
-		puts("");
-		puts("\t             OWNER MENU");
+		puts(""                                        );
+		puts("\t             OWNER MENU"               );
 		puts("\t======================================");
-		puts("\t1. List Products for Sale");
-		puts("\t2. Add a New Product");
-		puts("\t3. Delete a Product");
-		puts("\t4. Edit an Existing Product");
-		puts("\t5. View Recent Transactions");
-		puts("\t6. Delete Recent Transactions");
-		puts("\t7. View All Transactions");
-		puts("\t8. Delete All Transactions");
-		puts("\t9. Exit to Main Menu");
+		puts("\t1. List Products for Sale"             );
+		puts("\t2. Add a New Product"                  );
+		puts("\t3. Delete a Product"                   );
+		puts("\t4. Edit an Existing Product"           );
+		puts("\t5. View Recent Transactions"           );
+		puts("\t6. Delete Recent Transactions"         );
+		puts("\t7. View All Transactions"              );
+		puts("\t8. Delete All Transactions"            );
+		puts("\t9. Exit to Main Menu"                  );
 		
 		menu_option=prompt();
 		
@@ -113,13 +111,13 @@ void owner_menu(DS prod_list, DS xaction_list){
 			break;
 		case 7: // View All Transactions
 			print_transaction_list(xaction_list);
-			print_file(TRANSACTION_FILE);
+			print_file(DEFAULT_XACTION_FILE);
 			break;
 		case 8: // Delete All Transactions
 			puts("Confirm Delete All Transactions (y/n)?");
 			if (prompt() == 'y'){
 				clear_xactions(xaction_list);
-				fclose(fopen(TRANSACTION_FILE, "w"));
+				fclose(fopen(DEFAULT_XACTION_FILE, "w"));
 			}else puts("Canceling...");
 			
 		}
@@ -270,8 +268,8 @@ void edit_product(DS prod_list){
 		
 		puts("\t============================");
 		puts("\t1. Edit the Quantity on Hand");
-		puts("\t2. Change the Price");
-		puts("\t3. Back");
+		puts("\t2. Change the Price"         );
+		puts("\t3. Back"                     );
 		
 		menu_option=prompt();
 		

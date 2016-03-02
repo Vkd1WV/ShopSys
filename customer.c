@@ -1,6 +1,6 @@
 /******************************************************************************/
 //  Author: Ammon Dodson
-//  		Daryan Hanshew
+//          Daryan Hanshew
 //  CES202
 //  Winter 2016
 //
@@ -18,6 +18,7 @@
 //
 // ShopSys.c    contains the main menu and file activities
 //   int  main                   (                                      )
+//   bool owner_login            (                                      )
 //   Prod read_product           (FILE* product_file_discriptor         )
 //   DS   read_product_file      (const char* file_name                 )
 //   int  write_product_file     (const char* file_name, DS product_data)
@@ -30,21 +31,19 @@
 //   void edit_product          (DS product_data                         )
 //   void print_transaction_list(DS transaction_data                     )
 //   void clear_xactions        (DS transaction_data                     )
+//   void print_file            (const char* filename                    )
 //
 // customer.c   Contains the customer's menu and functions
-//   void customer_menu    (DS prod_list, DS trans_list)
-//   void sort_menu        (DS prod_list               )
-//   void update_cart      (Trans cart                 )
-//   void add_to_cart      (Trans cart  , DS prod_list )
-//   void searchByName     (DS prod_list               )
-//   void printByUnits     (DS prod_list               )
-//   void printByPrice     (DS prod_list               )
-//   Prod copyProd         (Prod                       )
-//   void updateProductList(DS          , DS           )
+//   void customer_menu(DS prod_list, DS trans_list               )
+//   int cart_menu     (Trans cart  , DS prod_list , DS trans_list)
+//   void update_cart  (Trans cart                                )
+//   void add_to_cart  (Trans cart  , DS prod_list                )
+//   void searchByName (DS prod_list                              )
+//   void edit_item    (Trans cart  , DS prod_list                )
+//   int checkout      (Trans cart  , DS prod_list , DS trans_list)
 //
 // services.c   Cotains functions used in multiple places
 //   int  prompt               (                              )
-//   bool owner_login          (                              )
 //   void print_product_list   (DS product_data               )
 //   void print_prod_heading   (FILE* file_discriptor         )
 //   void print_product        (FILE* file_discriptor, Prod p )
@@ -54,25 +53,20 @@
 /******************************************************************************/
 
 #include "global.h"
-
 #include <time.h>
-#include <string.h>
 
 //LOCAL FUNCTIONS
-int cart_menu    (Trans, DS , DS);
-void update_cart (Trans         );
-void add_to_cart (Trans, DS     );
-void searchByName(DS            );
-void edit_item   (Trans, DS     );
-int checkout     (Trans, DS , DS);
+int  cart_menu   (Trans cart , DS prod_list, DS trans_list  );
+void update_cart (Trans cart                                );
+void add_to_cart (Trans cart , DS prod_list                 );
+void searchByName(DS prodList                               );
+void edit_item   (Trans cart , DS prod_list                 );
+int  checkout    (Trans cart , DS prod_list, DS xaction_list);
 
-void sortStack(DS prod_list, int type);
-void sort_product_list(DS prod_list, int type);
+void print_sorted (int (*) (Prod, Prod) , DS);
 
-/*void printByUnits     (DS       );*/
-/*void printByPrice     (DS       );*/
-/*Prod copyProd         (Prod     );*/
-/*void updateProductList(DS   , DS);*/
+int by_qty  (Prod first, Prod second);
+int by_price(Prod first, Prod second);
 
 
 /************************************************************/
@@ -102,18 +96,18 @@ void customer_menu(DS prod_list, DS trans_list){
 	cart->address=grabline(stdin);
 
 	do {
-		puts("");
-		puts("\t              CUSTOMER MENU");
+		puts(""                                             );
+		puts("\t              CUSTOMER MENU"                );
 		puts("\t===========================================");
-		puts("\t1. View Products Sorted by ID");
+		puts("\t1. View Products Sorted by ID"              );
 		puts("\t2. View Products Sorted by Quantity on Hand");
-		puts("\t3. View Products Sorted by Price");
-		puts("\t4. Search for Products by Name");
-		puts("\t5. Add Item to Cart");
-		puts("\t6. View Cart (Go to Checkout)");
-		puts("\t7. Exit to Main Menu (Clearing Cart)");
-		puts("\t(Items remaining in cart will be removed)");
-
+		puts("\t3. View Products Sorted by Price"           );
+		puts("\t4. Search for Products by Name"             );
+		puts("\t5. Add Item to Cart"                        );
+		puts("\t6. View Cart (Go to Checkout)"              );
+		puts("\t7. Exit to Main Menu (Clearing Cart)"       );
+		puts("\t(Items remaining in cart will be removed)"  );
+		
 		menu_option=prompt();
 
 		switch (menu_option){
@@ -121,11 +115,10 @@ void customer_menu(DS prod_list, DS trans_list){
 			print_product_list(prod_list);
 			break;
 		case 2: // View Products Sorted by Quantity on Hand
-			sort_product_list(prod_list, 1);
+			//print_sorted(&by_qty, prod_list);
 			break;
 		case 3: // View Products Sorted by Price
-			sort_product_list(prod_list, 0);
-
+			//print_sorted(&by_price, prod_list);
 			break;
 		case 4: // Search for Products by Name
 			searchByName(prod_list);
@@ -134,7 +127,7 @@ void customer_menu(DS prod_list, DS trans_list){
 			add_to_cart(cart, prod_list);
 			break;
 		case 6: // view cart
-			if(cart_menu(cart, trans_list, prod_list) == EXIT_SUCCESS)
+			if(cart_menu(cart, prod_list, trans_list) == EXIT_SUCCESS)
 				return;
 			break;
 		case 7:
@@ -158,18 +151,18 @@ void customer_menu(DS prod_list, DS trans_list){
 /************************************************************/
 //USES: services.c:	prompt()
 
-int cart_menu(Trans cart, DS trans_list, DS prod_list){
+int cart_menu(Trans cart, DS prod_list, DS trans_list){
 	int menu_option=0;
 	do {
 		update_cart(cart);
 		print_xaction(stdout, cart);
-
-		puts("");
-		puts("\t        CART");
+		
+		puts(""                       );
+		puts("\t        CART"         );
 		puts("\t=====================");
 		puts("\t1. Edit Item Quantity");
-		puts("\t2. Checkout");
-		puts("\t3. Back");
+		puts("\t2. Checkout"          );
+		puts("\t3. Back"              );
 
 		menu_option=prompt();
 
@@ -354,12 +347,10 @@ void edit_item(Trans cart, DS prod_list){
 /*                  Checkout the Customer                   */
 /************************************************************/
 //USES: services.c: prompt()
-//input.h:    grabword()
-//
-//                  print_product()
-//      data.h:     isempty()
-//                  pview()
+//      data.h:     pview()
 //                  view_next()
+//                  iview()
+//                  push()
 
 
 int checkout(Trans cart, DS prod_list, DS xaction_list){
@@ -381,158 +372,27 @@ int checkout(Trans cart, DS prod_list, DS xaction_list){
 }
 
 
-
 /************************************************************/
-/*Print the whole product List to the Screen in SORTED ORDER*/
+/*            Print a Resorted Product List                 */
 /************************************************************/
-//USES:	data.h:			pview()
-//						view_next()
+//USES: 
 
-//type = 0 => sort by price
-//type = 1 => sort by quantity
-void sort_product_list(DS prod_list, int type){
 
-	sortStack(prod_list, type);
-	Prod product;
-	(void) pview(prod_list, 0); // set the view pointer to NULL
+/*void print_sorted(int (*compare) (Prod, Prod), DS prod_list){*/
+/*	Prod index;*/
+/*	*/
+/*	index=calloc(sizeof(Prod), size(prod_list));*/
+/*	if (index == NULL) {*/
+/*		puts("malloc(): returned NULL");*/
+/*		return;*/
+/*	}*/
+/*	*/
+/*}*/
 
-	print_prod_heading(stdout);
-
-	while ((product=view_next(prod_list)) != NULL){
-		print_product(stdout, product);
-	}
+int by_qty (Prod first, Prod second){
+	return second->num_unit - first->num_unit;
 }
 
-
-
-// Recursive function to insert an item x in sorted way
-void sortedInsert(DS s, Prod x, int type)
-{
-	(void) pview(s, 0); // set the view pointer to NULL
-	Prod top_element = view_next(s);
-    // Base case: Either stack is empty or newly inserted
-    // item is greater than top (more than all existing)
-
-    int condition_result = 0;
-    if(!isempty(s)){
-    	switch(type){
-    		case 0:
-    			condition_result = x->price - top_element->price;
-    			break;
-    		case 1:
-    			condition_result = x->num_unit - top_element->num_unit;
-    			break;
-    	}
-    }
-
-    if (isempty(s) || condition_result > 0)
-    {
-        push(s, x);
-        return;
-    }
-
-    // If top is greater, remove the top item and recur
-    Prod temp = pop(s);
-    sortedInsert(s, x, type);
-
-    // Put back the top item removed earlier
-    push(s, temp);
-}
-
-// Function to sort stack
-void sortStack(DS s, int type)
-{
-    // If stack is not empty
-    if (!isempty(s))
-    {
-        // Remove the top item
-        Prod x = pop(s);
-
-        // Sort remaining stack
-        sortStack(s, type);
-
-        // Push the top item back in sorted stack
-        sortedInsert(s, x, type);
-    }
-}
-
-
-void printByPrice(DS productList){
-	Prod product;
-	Prod sortedList;
-	if(productList->head == NULL){
-		puts("No Products Available");
-		return;
-	}
-	(void) pview(productList, 0); // set the view pointer to NULL
-	sortedList = copyProd((Prod)productList->head->data);
-	product =view_next(productList);
-	while((product=(Prod)view_next(productList))!=NULL){
-		Prod list = sortedList;
-		Prod copy = copyProd(product);
-		if(list->price>=product->price){
-			copy->next = sortedList;
-			sortedList = copy;
-		}else{
-			int inserted = 0;
-			while(list->next!=NULL){
-				//printf("\nNo  => %f: %f\n",product->price, list->next->price);
-				if((list->next->price>product->price)){
-					//printf("\nYes%f: %f\n",product->price, list->next->price);
-					copy->next = list->next;
-					list->next = copy;
-					list = list->next;
-					inserted = 1;
-					break;
-				}
-				list = list->next;
-			}
-			if(inserted == 0){
-				list->next = copy;
-			}
-		}
-
-	}
-	printProdList(sortedList);
-
-}
-
-void printByUnits(DS productList){
-	Prod product;
-	Prod sortedList;
-	if(productList->head == NULL){
-		puts("No Products Available");
-		return;
-	}
-	(void) pview(productList, 0); // set the view pointer to NULL
-	sortedList = copyProd((Prod)productList->head->data);
-	product =view_next(productList);
-	while((product=(Prod)view_next(productList))!=NULL){
-		Prod list = sortedList;
-		Prod copy = copyProd(product);
-		if(list->num_unit>=product->num_unit){
-			copy->next = sortedList;
-			sortedList = copy;
-		}else{
-			int inserted = 0;
-			while(list->next!=NULL){
-				//printf("\nNo  => %f: %f\n",product->price, list->next->price);
-				if((list->next->num_unit>product->num_unit)){
-					//printf("\nYes%f: %f\n",product->price, list->next->price);
-					copy->next = list->next;
-					list->next = copy;
-					list = list->next;
-					inserted = 1;
-					break;
-				}
-				list = list->next;
-			}
-			if(inserted == 0){
-				list->next = copy;
-			}
-		}
-
-	}
-	printProdList(sortedList);
-
+int by_price (Prod first, Prod second){
+	return second->price - first->price;
 }

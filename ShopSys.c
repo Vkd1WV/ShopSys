@@ -1,60 +1,58 @@
 /******************************************************************************/
-//	Author:	Ammon Dodson
-//			Daryan Hanshew
-//	CES202
-//	Winter 2016
+//  Author: Ammon Dodson
+//          Daryan Hanshew
+//  CES202
+//  Winter 2016
 //
-//	This program should be build with make. A makefile has been provided.
+//  This program should be built with make. A makefile has been provided.
 //
 /******************************* COMPONENTS ***********************************/
 //
-//	Makefile	contains build instructions
+// Makefile     contains build instructions
 //
-//	data.c data.h		stand-alone data structure library
-//	input.c input.h		stand-alone input library
+//  data.c  data.h      stand-alone data structure library
+// input.c input.h      stand-alone input library
 //
-//	global.h	contains type definitions, prototypes, and includes used
-//				throughout
+// global.h     contains type definitions, prototypes, and includes used
+//              throughout
 //
-//	ShopSys.c	contains the main menu and file activities
-//		: int  main						(										);
-//		: Prod read_product				(FILE* product_file_discriptor			);
-//		: DS   read_product_file		(const char* file_name					);
-//		: int  write_product_file		(const char* file_name, DS product_data	);
-//		: int  append_transaction_file	(const char* file_name, DS xaction_data	);
+// ShopSys.c    contains the main menu and file activities
+//   int  main                   (                                      )
+//   bool owner_login            (                                      )
+//   Prod read_product           (FILE* product_file_discriptor         )
+//   DS   read_product_file      (const char* file_name                 )
+//   int  write_product_file     (const char* file_name, DS product_data)
+//   int  append_transaction_file(const char* file_name, DS xaction_data)
 //
-//	owner.c		Contains the owner's menu and functions
-//		: void owner_menu				(DS product_data, DS transaction_data);
-//		: void add_product				(DS product_data		);
-//		: void delete_product			(DS product_data		);
-//		: void edit_product				(DS product_data		);
-//		: void print_transaction_list	(DS transaction_data	);
-//		: void clear_xactions			(DS transaction_data	);
+// owner.c      Contains the owner's menu and functions
+//   void owner_menu            (DS product_data    , DS transaction_data)
+//   void add_product           (DS product_data                         )
+//   void delete_product        (DS product_data                         )
+//   void edit_product          (DS product_data                         )
+//   void print_transaction_list(DS transaction_data                     )
+//   void clear_xactions        (DS transaction_data                     )
+//   void print_file            (const char* filename                    )
 //
-//	customer.c	Contains the customer's menu and functions
-//		: void sort_menu		(				);
-//		: void update_cart		( Trans			);
-//		: Cart createCartItem	(char*, int, DS	);
-//		: void freeCartItems	(DS				);
-//		: void searchByName		(DS				);
-//		: void printByUnits		(DS				);
-//		: void printByPrice		(DS				);
-//		: Prod copyProd			(Prod			);
-//		: void updateProductList(DS, DS			);
+// customer.c   Contains the customer's menu and functions
+//   void customer_menu(DS prod_list, DS trans_list               )
+//   int cart_menu     (Trans cart  , DS prod_list , DS trans_list)
+//   void update_cart  (Trans cart                                )
+//   void add_to_cart  (Trans cart  , DS prod_list                )
+//   void searchByName (DS prod_list                              )
+//   void edit_item    (Trans cart  , DS prod_list                )
+//   int checkout      (Trans cart  , DS prod_list , DS trans_list)
 //
-//	services.c	Cotains functions used in multiple places
-//		; int  prompt				(								);
-//		: bool owner_login			(								);
-//		: void print_product_list	(DS product_data				);
-//		: void print_prod_heading	(FILE* file_discriptor			);
-//		: void print_product		(FILE* file_discriptor, Prod p	);
-//		: void print_xaction_heading(FILE* file_discriptor			);
-//		: void print_xaction		(FILE* file_discriptor, Trans t	);
+// services.c   Cotains functions used in multiple places
+//   int  prompt               (                              )
+//   void print_product_list   (DS product_data               )
+//   void print_prod_heading   (FILE* file_discriptor         )
+//   void print_product        (FILE* file_discriptor, Prod p )
+//   void print_xaction_heading(FILE* file_discriptor         )
+//   void print_xaction        (FILE* file_discriptor, Trans t)
 //
 /******************************************************************************/
 
 #include "global.h"
-#include <string.h>
 
 // LOCAL FUNCTIONS
 DS   read_product_file      (const char*    );
@@ -73,7 +71,7 @@ bool owner_login            (               );
 //		customer.c:	customer_menu()
 
 int main (int argc, const char **argv){
-	const char* product_file="product.txt";
+	const char* product_file=DEFAULT_PRODUCT_FILE;
 	int menu_option=0;
 	DS product_list, transaction_list;
 	// DS is a generic data structure root provided by data.o
@@ -96,10 +94,10 @@ int main (int argc, const char **argv){
 	
 	// The Main Menu
 	do {
-		puts("\t         MAIN MENU");
+		puts("\t         MAIN MENU"         );
 		puts("\t===========================");
-		puts("\t1. Owner Login");
-		puts("\t2. Customer Login");
+		puts("\t1. Owner Login"             );
+		puts("\t2. Customer Login"          );
 		puts("\t3. Exit, Saving All Changes");
 		
 		menu_option=prompt();
@@ -121,8 +119,7 @@ int main (int argc, const char **argv){
 	puts("Exiting...");
 	
 	write_product_file(product_file, product_list);
-	append_transaction_file(TRANSACTION_FILE, transaction_list);
-	//FIXME: do something with these return values
+	append_transaction_file(DEFAULT_XACTION_FILE, transaction_list);
 	
 	return EXIT_SUCCESS;
 }
@@ -137,13 +134,13 @@ bool owner_login(){
 	
 	printf("username:");
 	temp=grabword(stdin);
-	if (strcmp(temp,"owner"))
+	if (strcmp(temp, USERNAME))
 		return false;
 	free(temp);
 	
 	printf("password:");
 	temp=grabword(stdin);
-	if (strcmp(temp,"password"))
+	if (strcmp(temp, PASSWORD))
 		return false;
 	free(temp);
 	

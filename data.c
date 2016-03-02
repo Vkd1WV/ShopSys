@@ -27,7 +27,7 @@ struct _root {
 	struct _node* view;
 	char type;
 	int flags;
-	// int size? // number of nodes in the structure
+	int size;  // number of nodes in the structure
 };
 
 /*********************************** FLAGS ************************************/
@@ -106,6 +106,7 @@ DS new_DS(const char type){
 	new_structure->head=NULL;
 	new_structure->tail=NULL;
 	new_structure->view=NULL;
+	new_structure->size=0;
 	
 	return new_structure;
 }
@@ -114,6 +115,10 @@ DS new_DS(const char type){
 int isempty(DS root){
 	if (root->head == NULL) return TRUE;
 	else return FALSE;
+}
+
+int size(const DS root){
+	return root->size;
 }
 
 /**	Dump the entire contents of the data structure to the console
@@ -167,6 +172,8 @@ int push(const DS root, void* data) {
 	// assign data
 	new_node->data=data;
 	new_node->index=NULL;
+	
+	root->size++;
 	
 	if (root->head == NULL) { // this will be the first node in the structure
 		(void) _add_first_node(root, new_node);
@@ -227,6 +234,8 @@ int append(const DS root, void* data) {
 	// assign data
 	new_node->data=data;
 	new_node->index=NULL;
+	
+	root->size++;
 	
 	if (root->head == NULL) { // this will be the first node in the structure
 		(void) _add_first_node(root, new_node);
@@ -348,7 +357,9 @@ void* pop(const DS root) {
 		puts(_e_invtype);
 		return NULL;
 	}
+	
 	free(temp);
+	root->size--;
 	return data;
 }
 /**	de-queue the bottom record from a linked list
@@ -399,6 +410,7 @@ void* dq(DS root) {
 		return NULL;
 	}
 	free(temp);
+	root->size--;
 	return data;
 }
 
@@ -539,6 +551,7 @@ void _delete_node(const DS root){
 		// It we're in the middle of the list
 		root->view->previous->right=root->view->right;
 		root->view->right->previous=root->view->previous;
+		root->size--;
 	
 	break;
 	case 't':
@@ -575,6 +588,8 @@ int _sortll(DS root, void* data_pt, char* index) {
 	new_node->index=index;
 	new_node->left=NULL;
 	root->view=new_node;
+	
+	root->size++;
 	
 	if (root->head == NULL) { // if the data structure is empty
 		_add_first_node(root, new_node);

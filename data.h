@@ -30,6 +30,10 @@ int isempty(DS root);
 /**	Test if the data structure is empty
  */
 
+int size(const DS);
+/** return the number of nodes in the structure
+ */
+
 void dump(const DS);
 /**	Dump the all indexes to the console
  *	the stored data is not changed

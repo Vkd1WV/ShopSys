@@ -1,55 +1,54 @@
 /******************************************************************************/
-//	Author:	Ammon Dodson
-//			Daryan Hanshew
-//	CES202
-//	Winter 2016
+//  Author: Ammon Dodson
+//          Daryan Hanshew
+//  CES202
+//  Winter 2016
 //
-//	This program should be build with make. A makefile has been provided.
+//  This program should be built with make. A makefile has been provided.
 //
 /******************************* COMPONENTS ***********************************/
 //
-//	Makefile	contains build instructions
+// Makefile     contains build instructions
 //
-//	data.c data.h		stand-alone data structure library
-//	input.c input.h		stand-alone input library
+//  data.c  data.h      stand-alone data structure library
+// input.c input.h      stand-alone input library
 //
-//	global.h	contains type definitions, prototypes, and includes used
-//				throughout
+// global.h     contains type definitions, prototypes, and includes used
+//              throughout
 //
-//	ShopSys.c	contains the main menu and file activities
-//    int  main                   (int argc             , const char **argv)
-//    Prod read_product           (FILE* product_file_discriptor			)
-//    DS   read_product_file      (const char* file_name					)
-//    int  write_product_file     (const char* file_name, DS product_data)
-//    int  append_transaction_file(const char* file_name, DS xaction_data)
+// ShopSys.c    contains the main menu and file activities
+//   int  main                   (                                      )
+//   bool owner_login            (                                      )
+//   Prod read_product           (FILE* product_file_discriptor         )
+//   DS   read_product_file      (const char* file_name                 )
+//   int  write_product_file     (const char* file_name, DS product_data)
+//   int  append_transaction_file(const char* file_name, DS xaction_data)
 //
-//	owner.c		Contains the owner's menu and functions
-//		 void owner_menu				(DS product_data, DS transaction_data)
-//		 void add_product				(DS product_data		)
-//		 void delete_product			(DS product_data		)
-//		 void edit_product				(DS product_data		)
-//		 void print_transaction_list	(DS transaction_data	)
-//		 void clear_xactions			(DS transaction_data	)
+// owner.c      Contains the owner's menu and functions
+//   void owner_menu            (DS product_data    , DS transaction_data)
+//   void add_product           (DS product_data                         )
+//   void delete_product        (DS product_data                         )
+//   void edit_product          (DS product_data                         )
+//   void print_transaction_list(DS transaction_data                     )
+//   void clear_xactions        (DS transaction_data                     )
+//   void print_file            (const char* filename                    )
 //
-//	customer.c	Contains the customer's menu and functions
-//		 void sort_menu		(				)
-//		 void update_cart		( Trans			)
-//		 Cart createCartItem	(char*, int, DS	)
-//		 void freeCartItems	(DS				)
-//		 void searchByName		(DS				)
-//		 void printByUnits		(DS				)
-//		 void printByPrice		(DS				)
-//		 Prod copyProd			(Prod			)
-//		 void updateProductList(DS, DS			)
+// customer.c   Contains the customer's menu and functions
+//   void customer_menu(DS prod_list, DS trans_list               )
+//   int cart_menu     (Trans cart  , DS prod_list , DS trans_list)
+//   void update_cart  (Trans cart                                )
+//   void add_to_cart  (Trans cart  , DS prod_list                )
+//   void searchByName (DS prod_list                              )
+//   void edit_item    (Trans cart  , DS prod_list                )
+//   int checkout      (Trans cart  , DS prod_list , DS trans_list)
 //
-//	services.c	Cotains functions used in multiple places
-//		 int  prompt				(								)
-//		 bool owner_login			(								)
-//		 void print_product_list	(DS product_data				)
-//		 void print_prod_heading	(FILE* file_discriptor			)
-//		 void print_product		(FILE* file_discriptor, Prod p	)
-//		 void print_xaction_heading(FILE* file_discriptor			)
-//		 void print_xaction		(FILE* file_discriptor, Trans t	)
+// services.c   Cotains functions used in multiple places
+//   int  prompt               (                              )
+//   void print_product_list   (DS product_data               )
+//   void print_prod_heading   (FILE* file_discriptor         )
+//   void print_product        (FILE* file_discriptor, Prod p )
+//   void print_xaction_heading(FILE* file_discriptor         )
+//   void print_xaction        (FILE* file_discriptor, Trans t)
 //
 /******************************************************************************/
 
