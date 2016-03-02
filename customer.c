@@ -16,6 +16,14 @@
 // global.h     contains type definitions, prototypes, and includes used
 //              throughout
 //
+// services.c   Cotains functions used in multiple places
+//   int  prompt               (                              )
+//   void print_product_list   (DS product_data               )
+//   void print_prod_heading   (FILE* file_discriptor         )
+//   void print_product        (FILE* file_discriptor, Prod p )
+//   void print_xaction_heading(FILE* file_discriptor         )
+//   void print_xaction        (FILE* file_discriptor, Trans t)
+//
 // ShopSys.c    contains the main menu and file activities
 //   int  main                   (                                      )
 //   bool owner_login            (                                      )
@@ -34,21 +42,17 @@
 //   void print_file            (const char* filename                    )
 //
 // customer.c   Contains the customer's menu and functions
-//   void customer_menu(DS prod_list, DS trans_list               )
-//   int cart_menu     (Trans cart  , DS prod_list , DS trans_list)
-//   void update_cart  (Trans cart                                )
-//   void add_to_cart  (Trans cart  , DS prod_list                )
-//   void searchByName (DS prod_list                              )
-//   void edit_item    (Trans cart  , DS prod_list                )
-//   int checkout      (Trans cart  , DS prod_list , DS trans_list)
+//   int  cart_menu   (Trans cart , DS prod_list, DS trans_list  )
+//   void update_cart (Trans cart                                )
+//   void add_to_cart (Trans cart , DS prod_list                 )
+//   void searchByName(DS prodList                               )
+//   void edit_item   (Trans cart , DS prod_list                 )
+//   int  checkout    (Trans cart , DS prod_list, DS xaction_list)
 //
-// services.c   Cotains functions used in multiple places
-//   int  prompt               (                              )
-//   void print_product_list   (DS product_data               )
-//   void print_prod_heading   (FILE* file_discriptor         )
-//   void print_product        (FILE* file_discriptor, Prod p )
-//   void print_xaction_heading(FILE* file_discriptor         )
-//   void print_xaction        (FILE* file_discriptor, Trans t)
+//   void print_sorted(int (*) (const void*, const void*) , DS)
+//
+//   int  by_qty      (const void* first, const void* second)
+//   int  by_price    (const void* first, const void* second)
 //
 /******************************************************************************/
 
@@ -139,7 +143,7 @@ void customer_menu(DS prod_list, DS trans_list){
 	} while (menu_option != 7);
 
 	// Free memory
-	puts("Emptying Cart");
+	puts("Emptying Cart...");
 	while((product=pop(cart->items)) != NULL)
 		free(product);
 	free(cart->items);
@@ -172,10 +176,10 @@ int cart_menu(Trans cart, DS prod_list, DS trans_list){
 			break;
 		case 2: // Checkout
 			if(checkout(cart, prod_list, trans_list) == EXIT_SUCCESS)
-				return EXIT_SUCCESS;
+				return EXIT_SUCCESS; // Sale :D
 		}
 	} while (menu_option != 3);
-	return EXIT_FAILURE;
+	return EXIT_FAILURE; // No Sale :(
 }
 
 /************************************************************/
@@ -200,11 +204,13 @@ void update_cart(Trans cart){
 	cart->pay=0;
 	pview(cart->items, 0); // initialize the view_next pointer
 	while((product=view_next(cart->items)) != NULL){
-		if (product->num_unit <1){
+		
+		if (product->num_unit <1){ // if there are 0 units we remove the item
 			iremove(cart->items, product->ID);
 			/* After removing a node the view pointer is reset so we have to */
 			/* start the process over again */
 			cart->pay=0;
+			
 		}else
 			cart->pay += product->price * product->num_unit;
 	}
@@ -330,7 +336,7 @@ void edit_item(Trans cart, DS prod_list){
 	print_prod_heading(stdout);
 	print_product(stdout, item);
 
-	do {
+	do { // check that there are enough units in stock
 		free(input);
 		printf("\nEnter New Number of Units (enter 0 to remove item): ");
 		input=grabword(stdin);
@@ -384,29 +390,31 @@ void print_sorted(int (compare) (const void*, const void*), DS prod_list){
 	Prod* index;
 	int num_nodes;
 	
+	// get the size of the data set
 	num_nodes=size(prod_list);
 	
+	// create a new index
 	index=calloc(sizeof(Prod), num_nodes);
 	if (index == NULL) {
 		puts("malloc(): returned NULL");
 		return;
 	}
 	
+	// set the index pointers to each product
 	pview(prod_list, 0);
-	for (int i=0; i<num_nodes; i++){
+	for (int i=0; i<num_nodes; i++)
 		index[i] = (Prod) view_next(prod_list);
-		if (index[i] == NULL){
-			puts("print_sorted(): Internal Error");
-			break;
-		}
-	}
 	
+	// sort the index
 	qsort(index, num_nodes, sizeof(Prod), compare);
 	
+	// print the results
 	print_prod_heading(stdout);
 	for (int i=0; i<num_nodes; i++){
 		print_product(stdout, index[i]);
 	}
+	
+	free(index);
 }
 
 int by_qty (const void* first, const void* second){
