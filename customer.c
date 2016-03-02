@@ -375,19 +375,34 @@ int checkout(Trans cart, DS prod_list, DS xaction_list){
 /************************************************************/
 /*            Print a Resorted Product List                 */
 /************************************************************/
-//USES: 
+//USES: data.h: size()
+//              pview()
+//              view_next()
 
 
-/*void print_sorted(int (*compare) (Prod, Prod), DS prod_list){*/
-/*	Prod index;*/
-/*	*/
-/*	index=calloc(sizeof(Prod), size(prod_list));*/
-/*	if (index == NULL) {*/
-/*		puts("malloc(): returned NULL");*/
-/*		return;*/
-/*	}*/
-/*	*/
-/*}*/
+void print_sorted(int (compare) (Prod, Prod), DS prod_list){
+	Prod* index;
+	int num_nodes;
+	
+	num_nodes=size(prod_list);
+	
+	index=calloc(sizeof(Prod), num_nodes);
+	if (index == NULL) {
+		puts("malloc(): returned NULL");
+		return;
+	}
+	
+	pview(prod_list, 0);
+	for (int i=0; i<num_nodes; i++){
+		index[i] = (Prod) view_next(prod_list);
+		if (index[i] == NULL){
+			puts("print_sorted(): Internal Error");
+			break;
+		}
+	}
+	
+	//qsort(index, num_nodes, sizeof(Prod), compare);
+}
 
 int by_qty (Prod first, Prod second){
 	return second->num_unit - first->num_unit;
