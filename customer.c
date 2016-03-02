@@ -100,17 +100,17 @@ void customer_menu(DS prod_list, DS trans_list){
 	cart->address=grabline(stdin);
 
 	do {
-		puts(""                                             );
-		puts("\t              CUSTOMER MENU"                );
-		puts("\t===========================================");
-		puts("\t1. View Products Sorted by ID"              );
-		puts("\t2. View Products Sorted by Quantity on Hand");
-		puts("\t3. View Products Sorted by Price"           );
-		puts("\t4. Search for Products by Name"             );
-		puts("\t5. Add Item to Cart"                        );
-		puts("\t6. View Cart (Go to Checkout)"              );
-		puts("\t7. Exit to Main Menu (Clearing Cart)"       );
-		puts("\t(Items remaining in cart will be removed)"  );
+		puts(""                                           );
+		puts("\t              CUSTOMER MENU"              );
+		puts("\t=========================================");
+		puts("\t1. View Products Sorted by ID"            );
+		puts("\t2. View Products Sorted by Quantity"      );
+		puts("\t3. View Products Sorted by Price"         );
+		puts("\t4. Search for Products by Name"           );
+		puts("\t5. Add Item to Cart"                      );
+		puts("\t6. View Cart (Go to Checkout)"            );
+		puts("\t7. Exit to Main Menu (Clearing Cart)"     );
+		puts("\t(Items remaining in cart will be removed)");
 		
 		menu_option=prompt();
 
