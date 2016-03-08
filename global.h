@@ -67,20 +67,20 @@
 /**************************** TYPE DEFINITIONS ********************************/
 
 struct Product{
-char*  ID;
-char* name;
-int num_unit;
-float price;
-struct Product * next;
+	char*  ID;
+	char* name;
+	int num_unit;
+	float price;
+	struct Product * next;
 };
 
 struct Transaction{
-char* f_name;
-char* l_name;
-char* address;
-float pay;
-int dd, mm, yy;
-DS items;			// I CHANGED THIS
+	char* f_name;
+	char* l_name;
+	char* address;
+	float pay;
+	int dd, mm, yy;
+	DS items;			// I CHANGED THIS
 };
 
 typedef struct Product* Prod;
