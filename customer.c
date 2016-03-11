@@ -388,7 +388,7 @@ int checkout(Trans cart, DS prod_list, DS xaction_list){
 
 void print_sorted(int (compare) (const void*, const void*), DS prod_list){
 	Prod* index;
-	int num_nodes;
+	int num_nodes, i;
 	
 	// get the size of the data set
 	num_nodes=size(prod_list);
@@ -402,7 +402,7 @@ void print_sorted(int (compare) (const void*, const void*), DS prod_list){
 	
 	// set the index pointers to each product
 	pview(prod_list, 0);
-	for (int i=0; i<num_nodes; i++)
+	for (i=0; i<num_nodes; i++)
 		index[i] = (Prod) view_next(prod_list);
 	
 	// sort the index
@@ -410,7 +410,7 @@ void print_sorted(int (compare) (const void*, const void*), DS prod_list){
 	
 	// print the results
 	print_prod_heading(stdout);
-	for (int i=0; i<num_nodes; i++){
+	for (i=0; i<num_nodes; i++){
 		print_product(stdout, index[i]);
 	}
 	
