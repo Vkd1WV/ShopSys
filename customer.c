@@ -361,6 +361,11 @@ void edit_item(Trans cart, DS prod_list){
 
 int checkout(Trans cart, DS prod_list, DS xaction_list){
 	Prod item, product;
+	
+	if (isempty(cart->items)){
+		puts("Your cart is empty.");
+		return EXIT_FAILURE;
+	}
 
 	puts("Confirm Checkout (y/n)?");
 	if(prompt() != 'y')
