@@ -61,8 +61,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "data.h"   // data structure library
-#include "input.h"  // input library
+#include <data.h>   // data structure library
+#include <input.h>  // input library
 
 /**************************** TYPE DEFINITIONS ********************************/
 
@@ -86,10 +86,6 @@ struct Transaction{
 typedef struct Product* Prod;
 typedef struct Transaction* Trans;
 
-// Convenience Definitions
-#define TRUE 1
-#define FALSE 0
-typedef enum {false, true} bool;
 
 #define DEFAULT_XACTION_FILE "transaction.txt"
 #define DEFAULT_PRODUCT_FILE "product.txt"
@@ -102,7 +98,10 @@ typedef enum {false, true} bool;
 // prototypes have to be here
 
 // In services.c
-int  prompt            (            );
+int cmp_product (const void * left, const void * right);
+int cmp_prod_key(const void * key , const void * product);
+
+int  prompt            (void        );
 void print_product_list(DS          );
 void print_prod_heading(FILE*       );
 void print_product     (FILE*, Prod );

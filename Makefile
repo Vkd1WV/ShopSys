@@ -2,31 +2,49 @@
 # Shop Sys : a shopping system
 #
 
+# Change these variables to point to the appropriate installation directories
+INSTALLDIR:=$(HOME)/prg
+LIBDIR:=$(INSTALLDIR)/lib
+INCDIR:=$(INSTALLDIR)/include
 
-cleanfiles=*.out *.o ShopSys
-options=-Wall -Wextra -pedantic -std=c11 -O2
+# My code builds without warnings--ALWAYS
+CWARNINGS:=	-Wall -Wextra -pedantic \
+	-Wmissing-prototypes -Wstrict-prototypes \
+	-Wmissing-declarations -Wredundant-decls -Wnested-externs -Wshadow \
+	-Wpointer-arith -Wcast-align \
+	-Wuninitialized -Wmaybe-uninitialized \
+	-Winline -Wno-long-long -Wwrite-strings \
+	-Wno-discarded-qualifiers #-Wconversion
 
+CFLAGS:= $(CWARNINGS) --std=c11 -I$(INCDIR) -L$(LIBDIR)
+
+ALLFILES:=customer.c owner.c services.c ShopSys.c global.h
+OBJECTS:=services.o owner.o customer.o ShopSys.o
+LIBS:=-ldata -linput
+
+CLEANFILES=*.out *.o ShopSys
+
+.PHONEY: all
+
+all: CFLAGS += -O2
 all: ShopSys
 
-data.o: data.c data.h
-	gcc $(options) -c data.c
-input.o: input.c input.h
-	gcc $(options) -c input.c
+debug: CFLAGS += -DDEBUG -g
+debug: ShopSys
 
-services.o: services.c global.h
-	gcc $(options) -c services.c
 
-owner.o: owner.c global.h
-	gcc $(options) -c owner.c
-customer.o: customer.c global.h
-	gcc $(options) -c customer.c
+ShopSys: $(OBJECTS)
+	$(CC) $(CFLAGS) -o $@ $(OBJECTS) $(LIBS)
 
-ShopSys.o: ShopSys.c global.h
-	gcc $(options) -c ShopSys.c
+%.o: %.c %.h
+	$(CC) $(CFLAGS) -c $<
 
-ShopSys: data.o input.o services.o owner.o customer.o ShopSys.o
-	gcc $(options) -o ShopSys \
-			data.o input.o services.o owner.o customer.o ShopSys.o
+################################## UTILITIES ###################################
 
+.PHONEY: clean todolist
 clean:
-	rm -f $(cleanfiles)
+	rm -f $(CLEANFILES)
+
+todolist:
+	-@for file in $(ALLFILES:Makefile=); do fgrep -H -e TODO -e FIXME $$file; done; true
+

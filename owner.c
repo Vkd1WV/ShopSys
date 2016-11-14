@@ -134,10 +134,10 @@ void print_file(const char* filename){
 	
 	fd=fopen(filename, "r");
 	
-	c=fgetc(fd);
+	c= (char) fgetc(fd);
 	while (!feof(fd)){
 		putchar(c);
-		c=fgetc(fd);
+		c= (char) fgetc(fd);
 	}
 	fclose(fd);
 }
@@ -148,72 +148,65 @@ void print_file(const char* filename){
 //USES: input.h:		grabword()
 //						grabline()
 //		data.h:			sort()
-//						iview()
+//						DS_find()
 //		formatting.c:	print_prod_heading()
 //						print_product()
 
 void add_product(DS prod_list){
-	Prod new_product;
-	char* temp;
-	
-	new_product=malloc(sizeof(struct Product));
-	if (new_product == NULL) {
-		puts("malloc(): returned NULL");
-		return;
-	}
+	struct Product new_product;
+	char *         temp;
+	Prod           product;
 	
 	printf("\nEnter new Product ID:");
-	new_product->ID=grabword(stdin);
+	new_product.ID=grabword(stdin);
 	
+	if (( product = DS_find(prod_list, new_product.ID) )){
 	// make sure the product ID is unique
-	if (sort(prod_list, new_product, new_product->ID)) {
 		puts("That Product ID is already in Use:");
 		print_prod_heading(stdout);
-		print_product(
-			stdout,
-			iview(prod_list, new_product->ID)
-		);
+		print_product(stdout, product);
 		puts("");
-		
-		free(new_product);
+		free(new_product.ID);
 		return;
 	}
 	
-	
 	printf("Enter new Product Name:");
-	new_product->name=grabline(stdin);
+	new_product.name=grabline(stdin);
 	printf("Enter new Product price:");
-	temp=grabword(stdin);
-	new_product->price=atof(temp);
+	temp = grabword(stdin);
+	new_product.price = atof(temp);
 	free(temp);
 	printf("Enter new Product Quantity on hand:");
 	temp=grabword(stdin);
-	new_product->num_unit=atoi(temp);
+	new_product.num_unit = atoi(temp);
 	free(temp);
 	
-	print_prod_heading(stdout);
-	print_product(stdout, new_product);
+	if( !DS_sort(prod_list, &new_product) ){
+		print_prod_heading(stdout);
+		print_product(stdout, &new_product);
+	}
+	else puts ("something went wrong");
 }
 
 /************************************************************/
 /*					Delete a Product						*/
 /************************************************************/
 //USES: input.h:		grabword()
-//		data.h:			iview()
-//						iremove()
+//		data.h:			DS_find()
+//						DS_remove()
 //		formatting.c	print_prod_heading()
 //						print_product()
 //		ShopSys.c		prompt()
 
 
 void delete_product(DS prod_list){
-	char* prod_id;
+	char * prod_id;
 	Prod prod_rec;
 	
 	printf("Enter the ID of the Product to Delete: ");
 	prod_id=grabword(stdin);
 	
-	prod_rec=iview(prod_list, prod_id);
+	prod_rec=DS_find(prod_list, prod_id);
 	
 	if (prod_rec == NULL){
 		printf("\nThat Product Does not Exist\n");
@@ -228,10 +221,9 @@ void delete_product(DS prod_list){
 		puts("Canceling...");
 		return;
 	}
-	// delete the data
-	free(prod_rec);
+	
 	// delete the node
-	iremove(prod_list, prod_id);
+	DS_remove(prod_list);
 	return;
 }
 
@@ -239,21 +231,20 @@ void delete_product(DS prod_list){
 /*						Edit a Product						*/
 /************************************************************/
 //USES: input.h:		grabword()
-//		data.h:			iview()
+//		data.h:			DS_find()
 //		formatting.c	print_prod_heading()
 //						print_product()
 //		ShopSys.c		prompt()
 
 void edit_product(DS prod_list){
 	int menu_option=0;
-	char* prod_id;
 	char* input;
 	Prod prod_rec;
 	
 	printf("Enter the ID of the Product to Edit: ");
-	prod_id=grabword(stdin);
+	input=grabword(stdin);
 	
-	prod_rec=iview(prod_list, prod_id);
+	prod_rec=DS_find(prod_list, input);
 	
 	if (prod_rec == NULL){
 		printf("\nThat Product Does not Exist\n");
@@ -294,29 +285,30 @@ void edit_product(DS prod_list){
 /************************************************************/
 /*				Print the Whole Transaction List			*/
 /************************************************************/
-//USES:	data.h:			pview()
-//						view_next()
+//USES:	data.h:			DS_isempty()
+//						DS_first()
+//						DS_next()
 //		formatting.c:	print_xaction_heading()
 //						print_xaction()
 
 void print_transaction_list(DS xaction_list){
 	Trans xaction;
 	
-	if (isempty(xaction_list))
+	if (DS_isempty(xaction_list))
 		puts("No Recent Transactions.");
-	
-	(void) pview(xaction_list, 0); // set the view pointer to NULL
-	
-	while ((xaction=view_next(xaction_list)) != NULL){
-		print_xaction(stdout, xaction);
+	else {
+		xaction = DS_first(xaction_list);
+		do {
+			print_xaction(stdout, xaction);
+		} while (( xaction = DS_next(xaction_list) ));
 	}
 }
 
 /************************************************************/
 /*				Clear All Transactions						*/
 /************************************************************/
-//USES: data.h:			isempty()
-//						pop()
+//USES: data.h:			DS_isempty()
+//						DS_pop()
 //		formatting.c:	print_transaction_list()
 //		ShopSys.c		prompt()
 
@@ -324,7 +316,7 @@ void print_transaction_list(DS xaction_list){
 void clear_xactions(DS xaction_list){
 	Trans temp;
 	
-	if(isempty(xaction_list)){
+	if(DS_isempty(xaction_list)){
 		puts("There are no Outstanding Transactions");
 		return;
 	}
@@ -337,8 +329,7 @@ void clear_xactions(DS xaction_list){
 		return;
 	}
 	
-	while((temp=pop(xaction_list)) != NULL)
-		free(temp);
+	while(( temp = DS_pop(xaction_list) )) free(temp);
 	return;
 }
 

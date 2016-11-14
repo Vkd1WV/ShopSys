@@ -1,0 +1,65 @@
+
+2016.02.28 NAME: Dodson, Ammon
+        ADDRESS: 135 W. Anderson Rd.
+   ID   	             NAME             	QUANTITY	UNIT PRICE
+    0000	              ShopSys Software	       2	 $   49.99
+    9999	                    DaNk m3Me5	       5	 $    0.99
+========	==============================	========	==========
+        	                              	  TOTAL:	 $  104.93
+
+2016.02.28 NAME: Hanshew, Daryan
+        ADDRESS: Gig Harbor
+   ID   	             NAME             	QUANTITY	UNIT PRICE
+    1112	                 LG TV 32 inch	       1	 $  230.00
+    4249	        STRAWBERRIES FULL CASE	       1	 $    7.49
+    l33t	             Snuggles the Bear	       1	 $  199.99
+========	==============================	========	==========
+        	                              	  TOTAL:	 $  437.48
+
+2016.02.28 NAME: Biggs, Penny
+        ADDRESS: 123 6th St.
+   ID   	             NAME             	QUANTITY	UNIT PRICE
+    0000	              ShopSys Software	       1	 $   49.99
+    1111	       16 piece Dinnerware Set	       1	 $   60.00
+    1212	                 Awesome Pizza	       5	 $    3.69
+    9999	                    DaNk m3Me5	      15	 $    0.99
+========	==============================	========	==========
+        	                              	  TOTAL:	 $  143.29
+
+2016.03.02 NAME: Dodson, Ammon
+        ADDRESS: 1234 E.
+   ID   	             NAME             	QUANTITY	UNIT PRICE
+    1234	                      pendrive	       5	 $   15.00
+    2002	                       android	       1	 $ 2000.00
+    9999	                    DaNk m3Me5	      20	 $    0.99
+========	==============================	========	==========
+        	                              	  TOTAL:	 $ 2094.80
+
+2016.03.02 NAME: Dodson, Raquel
+        ADDRESS: alzate 110
+   ID   	             NAME             	QUANTITY	UNIT PRICE
+    1212	                 Awesome Pizza	       4	 $    3.69
+========	==============================	========	==========
+        	                              	  TOTAL:	 $   14.76
+
+2016.03.02 NAME: Dodson, Raquel
+        ADDRESS: Eje 1 Alzate 110
+   ID   	             NAME             	QUANTITY	UNIT PRICE
+    1113	                      ChocoCat	       7	 $    2.70
+========	==============================	========	==========
+        	                              	  TOTAL:	 $   18.90
+
+2016.03.11 NAME: Jones, Billy Ray
+        ADDRESS: 16 trailer court
+   ID   	             NAME             	QUANTITY	UNIT PRICE
+    1112	                 LG TV 32 inch	       1	 $  230.00
+    1113	                      ChocoCat	       5	 $    2.70
+========	==============================	========	==========
+        	                              	  TOTAL:	 $  243.50
+
+2016.11.14 NAME: Dodson, Ammon
+        ADDRESS: 121 Bonfil
+   ID   	             NAME             	QUANTITY	UNIT PRICE
+    2222	                  Slinky Thong	       5	 $    6.98
+========	==============================	========	==========
+        	                              	  TOTAL:	 $   34.90

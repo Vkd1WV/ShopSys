@@ -57,11 +57,23 @@
 #include <string.h>
 
 /************************************************************/
+//                 A COMPARATOR FUNCTION
+/************************************************************/
+
+int cmp_product(const void * left, const void * right){
+	return strcmp( ((Prod)left)->ID, ((Prod)right)->ID );
+}
+
+int cmp_prod_key(const void * key, const void * product){
+	return strcmp( (char*) key, ((Prod)product)->ID );
+}
+
+/************************************************************/
 /*						The Menu Prompt						*/
 /************************************************************/
 //USES:	input.h:	grabword()
 
-int prompt(){
+int prompt(void){
 	char* temp;
 	int result;
 	
@@ -83,13 +95,14 @@ int prompt(){
 void print_product_list(DS prod_list){
 	Prod product;
 	
-	(void) pview(prod_list, 0); // set the view pointer to NULL
+	//(void) pview(prod_list, 0); // set the view pointer to NULL
 	
 	print_prod_heading(stdout);
 	
-	while ((product=view_next(prod_list)) != NULL){
+	product=DS_first(prod_list);
+	do{
 		print_product(stdout, product);
-	}
+	} while (( product = DS_next(prod_list) ));
 }
 
 /************************************************************/
@@ -142,13 +155,14 @@ void print_xaction(FILE* file, Trans t){
 			t->f_name,
 			t->address
 	);
-	if (isempty(t->items))
+	if (DS_isempty(t->items))
 		fputs("\tYour cart is empty\n", file);
 	else{
 		print_prod_heading(file);
-		pview(t->items, 0);
-		while((item=view_next(t->items)) != NULL)
+		item=DS_first(t->items);
+		do{
 			print_product(file, item);
+		} while (( item = DS_next(t->items) ));
 	}
 	fprintf(file,
 			"========\t==============================\t========\t==========\n");

@@ -59,7 +59,7 @@ DS   read_product_file      (const char*    );
 Prod read_product           (FILE*          );
 int  write_product_file     (const char*, DS);
 int  append_transaction_file(const char*, DS);
-bool owner_login            (               );
+bool owner_login            (void           );
 
 /************************************************************/
 /*							MAIN							*/
@@ -74,7 +74,7 @@ int main (int argc, const char **argv){
 	const char* product_file=DEFAULT_PRODUCT_FILE;
 	int menu_option=0;
 	DS product_list, transaction_list;
-	// DS is a generic data structure root provided by data.o
+	// DS is a generic data structure provided by libdata
 	
 	
 	// Use different product files
@@ -90,7 +90,13 @@ int main (int argc, const char **argv){
 		return EXIT_FAILURE;
 	
 	// Create an empty transaction list
-	transaction_list=new_DS('l');
+	transaction_list=DS_new(
+		DS_list,
+		sizeof(struct Transaction),
+		true,
+		NULL,
+		NULL
+	);
 	
 	// The Main Menu
 	do {
@@ -121,6 +127,9 @@ int main (int argc, const char **argv){
 	write_product_file(product_file, product_list);
 	append_transaction_file(DEFAULT_XACTION_FILE, transaction_list);
 	
+	DS_delete(product_list);
+	DS_delete(transaction_list);
+	
 	return EXIT_SUCCESS;
 }
 
@@ -129,7 +138,7 @@ int main (int argc, const char **argv){
 /************************************************************/
 //USES:	input.h:	grabword()
 
-bool owner_login(){
+bool owner_login(void){
 	char* temp;
 	
 	printf("username:");
@@ -182,8 +191,13 @@ DS read_product_file(const char* file_name){
 	// make a link list to contain product data.
 	// Link list implementation provided by data.h
 	
-	product_list=new_DS('l');
-	
+	product_list=DS_new(
+		DS_bst                ,
+		sizeof(struct Product),
+		false                 ,
+		&cmp_product          ,
+		&cmp_prod_key
+	);
 	
 	while ( !feof(product_fd) ) { // check for end of file
 	
@@ -192,7 +206,7 @@ DS read_product_file(const char* file_name){
 			break;
 		
 		// add it to the DS
-		if(sort(product_list, new_prod_rec, new_prod_rec->ID)){
+		if(DS_sort(product_list, new_prod_rec)){
 			puts("read_product_file():ERROR in adding data to sorted DS");
 			return NULL;
 		}
@@ -249,7 +263,7 @@ Prod read_product(FILE* file){
 /************************************************************/
 /*		Write the product data to the product.txt file		*/
 /************************************************************/
-//USES:	data.h:			pop()
+//USES:	data.h:			DS_pop()
 //		formatting.c	print_prod_heading()
 //						print_product()
 
@@ -259,7 +273,7 @@ Prod read_product(FILE* file){
  *	clears the product data structure
 */
 int write_product_file(const char* file_name, DS product_list){
-	FILE* fd;
+	FILE *     fd;
 	Prod temp;
 	
 	// open the file
@@ -271,9 +285,8 @@ int write_product_file(const char* file_name, DS product_list){
 	
 	print_prod_heading(fd);
 	
-	while ((temp=pop(product_list)) != NULL){
+	while (( temp = DS_pop(product_list) )){
 		print_product(fd, temp);
-		free(temp);
 	}
 	
 	fclose(fd);
@@ -284,7 +297,7 @@ int write_product_file(const char* file_name, DS product_list){
 /************************************************************/
 /*	append new transactions to the end of transactions.txt	*/
 /************************************************************/
-//USES:	data.h:			pop()
+//USES:	data.h:			DS_pop()
 //		formatting.c	print_xaction_heading()
 //						print_xaction()
 
@@ -292,7 +305,7 @@ int write_product_file(const char* file_name, DS product_list){
  *	This function must only be accessed when the program closes
 */
 int append_transaction_file(const char* file_name, DS xaction_list){
-	FILE* fd;
+	FILE *      fd;
 	Trans temp;
 	
 	// open the file
@@ -302,9 +315,8 @@ int append_transaction_file(const char* file_name, DS xaction_list){
 		return EXIT_FAILURE;
 	}
 	
-	while ((temp=pop(xaction_list)) != NULL){
+	while (( temp = DS_pop(xaction_list) )){
 		print_xaction(fd, temp);
-		free(temp);
 	}
 	
 	fclose(fd);

@@ -79,25 +79,24 @@ int by_price(const void* first, const void* second);
 //USES: ShopSys.c:	prompt()
 
 void customer_menu(DS prod_list, DS trans_list){
-	int menu_option=0;
-	Trans cart;
-	Prod product;
+	int                menu_option=0;
+	struct Transaction cart;
 
-	// allocate space
-	cart=malloc(sizeof(struct Transaction));
-	if (cart == NULL) {
-		puts("malloc(): returned NULL");
-		return;
-	}
-	cart->items=new_DS('l');
+	cart.items=DS_new(
+		DS_bst,
+		sizeof(struct Product),
+		false,
+		&cmp_product,
+		&cmp_prod_key
+	);
 
 	// get customer information
 	printf("First Name(s): ");
-	cart->f_name=grabline(stdin);
+	cart.f_name=grabline(stdin);
 	printf("Last Name(s): ");
-	cart->l_name=grabline(stdin);
+	cart.l_name=grabline(stdin);
 	printf("Address: ");
-	cart->address=grabline(stdin);
+	cart.address=grabline(stdin);
 
 	do {
 		puts(""                                           );
@@ -118,37 +117,41 @@ void customer_menu(DS prod_list, DS trans_list){
 		case 1: // View Products Sorted by ID
 			print_product_list(prod_list);
 			break;
+		
 		case 2: // View Products Sorted by Quantity on Hand
 			print_sorted(&by_qty, prod_list);
 			break;
+		
 		case 3: // View Products Sorted by Price
 			print_sorted(&by_price, prod_list);
 			break;
+		
 		case 4: // Search for Products by Name
 			searchByName(prod_list);
 			break;
+		
 		case 5: // Add Item to Cart
-			add_to_cart(cart, prod_list);
+			add_to_cart(&cart, prod_list);
 			break;
+		
 		case 6: // view cart
-			if(cart_menu(cart, prod_list, trans_list) == EXIT_SUCCESS)
+			if(cart_menu(&cart, prod_list, trans_list) == EXIT_SUCCESS)
 				return;
 			break;
+		
 		case 7:
-			if(!isempty(cart->items)){
+			if(!DS_isempty(cart.items)){
 				puts("There are still items in your cart. Are you sure you want to leave (y/n)?");
 				if (prompt() != 'y') menu_option=0;
 			}
 		}
 	} while (menu_option != 7);
-
+	
 	// Free memory
 	puts("Emptying Cart...");
-	while((product=pop(cart->items)) != NULL)
-		free(product);
-	free(cart->items);
-	free(cart);
+	DS_delete(cart.items);
 }
+
 
 /************************************************************/
 /*                       Cart Menu                          */
@@ -157,6 +160,7 @@ void customer_menu(DS prod_list, DS trans_list){
 
 int cart_menu(Trans cart, DS prod_list, DS trans_list){
 	int menu_option=0;
+	
 	do {
 		update_cart(cart);
 		print_xaction(stdout, cart);
@@ -182,38 +186,42 @@ int cart_menu(Trans cart, DS prod_list, DS trans_list){
 	return EXIT_FAILURE; // No Sale :(
 }
 
+
 /************************************************************/
 /*             Update the Cart's date and Total             */
 /************************************************************/
-//USES: data.h:	pview()
-//				view_next()
+//USES: data.h:	DS_first()
+//				DS_next()
 
 void update_cart(Trans cart){
 	struct tm* tm_struct;
-	Prod product;
-	time_t seconds;
-
+	Prod       product;
+	time_t     seconds;
+	
 	// set date
 	seconds=time(NULL);
 	tm_struct=localtime(&seconds);
 	cart->dd=tm_struct->tm_mday;
 	cart->mm=tm_struct->tm_mon+1;
 	cart->yy=tm_struct->tm_year+1900;
-
+	
+	restart:
 	// update the total
 	cart->pay=0;
-	pview(cart->items, 0); // initialize the view_next pointer
-	while((product=view_next(cart->items)) != NULL){
+	
+	if(DS_isempty(cart->items)) return;
+	
+	product=DS_first(cart->items);
+	do{
+		// if there are 0 units we remove the item
+		if (product->num_unit <1){
+			DS_remove(cart->items);
+			goto restart;
+			// traversals must be restarted after a removal
+		}
+		else cart->pay += product->price * product->num_unit;
 		
-		if (product->num_unit <1){ // if there are 0 units we remove the item
-			iremove(cart->items, product->ID);
-			/* After removing a node the view pointer is reset so we have to */
-			/* start the process over again */
-			cart->pay=0;
-			
-		}else
-			cart->pay += product->price * product->num_unit;
-	}
+	} while (( product = DS_next(cart->items) ));
 }
 
 /************************************************************/
@@ -222,13 +230,13 @@ void update_cart(Trans cart){
 //USES: input.h:    grabword()
 //      services.c: print_prod_heading()
 //                  print_product()
-//      data.h:     isempty()
-//                  pview()
-//                  view_next()
+//      data.h:     DS_isempty()
+//                  DS_first()
+//                  DS_next()
 
 void searchByName(DS prodList){
 	char* search_term;
-	Prod product;
+	Prod  product;
 
 	printf("Enter Name of the desired product: ");
 	search_term=grabword(stdin);
@@ -236,10 +244,11 @@ void searchByName(DS prodList){
 	puts("\nResults:");
 	print_prod_heading(stdout);
 
-	pview(prodList, 0); // start searching from the head of the linked list
-	while((product=view_next(prodList)) != NULL)
+	product=DS_first(prodList);
+	do {
 		if(strstr(product->name, search_term) != NULL)
 			print_product(stdout, product);
+	} while (( product = DS_next(prodList) ));
 
 	free(search_term);
 }
@@ -248,36 +257,45 @@ void searchByName(DS prodList){
 /*                 Add an Item to the cart                  */
 /************************************************************/
 //USES: input.h:    grabword()
-//      data.h:     iview()
-//                  pview()
-//                  view_next()
-//                  sort()
+//      data.h:     DS_find()
+//                  DS_first()
+//                  DS_next()
+//                  DS_sort()
 //      services.c: print_prod_heading()
 //                  print_product()
 
 
 void add_to_cart(Trans cart, DS prod_list){
-	char* input;
-	int num_unit;
-	Prod prod_rec, new_item;
+	char *         input;
+	int            num_unit;
+	Prod           prod_rec;
+	struct Product new_item;
 
 	printf("\nEnter ID of the product: ");
 	input = grabword(stdin);
 
 	// Find the Product
-	prod_rec=iview(prod_list, input);
+	prod_rec=DS_find(prod_list, input);
 	if (prod_rec == NULL){
 		printf("\nThat Product Does not Exist\n");
 		return;
 	}
 
 	// check if the item is already in the cart
-	if( iview(cart->items, input) != NULL ){
+	if( !DS_isempty(cart->items) && DS_find(cart->items, input) ){
 		printf("\nThat Product is already in your cart.\n");
 		puts("You can change the quantity from the cart menu.");
+		
+		free(input);
 		return;
 	}
-
+	
+	if (!prod_rec->num_unit){
+		printf("\nWe're sorry. That product is currently out of stock.\n");
+		free(input);
+		return;
+	}
+	
 	print_prod_heading(stdout);
 	print_product(stdout, prod_rec);
 
@@ -290,19 +308,12 @@ void add_to_cart(Trans cart, DS prod_list){
 
 	free(input);
 
-	// add a new item to the cart
-	new_item=malloc(sizeof(struct Product));
-	if (new_item == NULL) {
-		puts("malloc(): returned NULL");
-		return;
-	}
+	new_item.ID       = prod_rec->ID;
+	new_item.name     = prod_rec->name;
+	new_item.price    = prod_rec->price;
+	new_item.num_unit = num_unit;
 
-	new_item->ID       = prod_rec->ID;
-	new_item->name     = prod_rec->name;
-	new_item->price    = prod_rec->price;
-	new_item->num_unit = num_unit;
-
-	sort(cart->items, new_item, new_item->ID);
+	DS_sort(cart->items, &new_item);
 }
 
 
@@ -310,13 +321,13 @@ void add_to_cart(Trans cart, DS prod_list){
 /*                 Edit an Item in the cart                 */
 /************************************************************/
 //USES: input.h:    grabword()
-//      data.h:     iview()
+//      data.h:     DS_find()
 //      services.c: print_prod_heading()
 //                  print_product()
 
 
 void edit_item(Trans cart, DS prod_list){
-	char* input;
+	char * input;
 	int num_unit;
 	Prod prod_rec, item;
 
@@ -324,14 +335,14 @@ void edit_item(Trans cart, DS prod_list){
 	input = grabword(stdin);
 
 	// find the item
-	item=iview(cart->items, input);
+	item=DS_find(cart->items, input);
 	if (item == NULL){
 		printf("\nThat Product is not in your cart.\n");
 		return;
 	}
 
 	// Find the Product
-	prod_rec=iview(prod_list, input);
+	prod_rec=DS_find(prod_list, input);
 
 	print_prod_heading(stdout);
 	print_product(stdout, item);
@@ -353,16 +364,16 @@ void edit_item(Trans cart, DS prod_list){
 /*                  Checkout the Customer                   */
 /************************************************************/
 //USES: services.c: prompt()
-//      data.h:     pview()
-//                  view_next()
-//                  iview()
-//                  push()
+//      data.h:     DS_first()
+//                  DS_next()
+//                  DS_find()
+//                  DS_push()
 
 
 int checkout(Trans cart, DS prod_list, DS xaction_list){
 	Prod item, product;
 	
-	if (isempty(cart->items)){
+	if (DS_isempty(cart->items)){
 		puts("Your cart is empty.");
 		return EXIT_FAILURE;
 	}
@@ -372,13 +383,13 @@ int checkout(Trans cart, DS prod_list, DS xaction_list){
 		return EXIT_FAILURE;
 
 	// Update the product list
-	pview(cart->items, 0);
-	while((item=view_next(cart->items)) != NULL){ // for each item in the cart
-		product =  iview(prod_list, item->ID); // find the corresponding product
-		product->num_unit -= item->num_unit;   // and change its quantity
-	}
+	item = DS_first(cart->items);
+	do{
+		product=DS_find(prod_list, item->ID); // find the corresponding product
+		product->num_unit -= item->num_unit; // and change its quantity
+	} while (( item = DS_next(cart->items) ));
 
-	push(xaction_list, cart);
+	DS_push(xaction_list, cart);
 	return EXIT_SUCCESS;
 }
 
@@ -386,17 +397,17 @@ int checkout(Trans cart, DS prod_list, DS xaction_list){
 /************************************************************/
 /*            Print a Resorted Product List                 */
 /************************************************************/
-//USES: data.h: size()
-//              pview()
-//              view_next()
+//USES: data.h: DS_count()
+//              DS_first()
+//              DS_next()
 
 
 void print_sorted(int (compare) (const void*, const void*), DS prod_list){
 	Prod* index;
-	int num_nodes, i;
+	unsigned int num_nodes, i;
 	
 	// get the size of the data set
-	num_nodes=size(prod_list);
+	num_nodes=DS_count(prod_list);
 	
 	// create a new index
 	index=calloc(sizeof(Prod), num_nodes);
@@ -406,9 +417,9 @@ void print_sorted(int (compare) (const void*, const void*), DS prod_list){
 	}
 	
 	// set the index pointers to each product
-	pview(prod_list, 0);
-	for (i=0; i<num_nodes; i++)
-		index[i] = (Prod) view_next(prod_list);
+	index[0] = (Prod) DS_first(prod_list);
+	for (i=1; i<num_nodes; i++)
+		index[i] = (Prod) DS_next(prod_list);
 	
 	// sort the index
 	qsort(index, num_nodes, sizeof(Prod), compare);
