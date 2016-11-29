@@ -82,12 +82,11 @@ void customer_menu(DS prod_list, DS trans_list){
 	int                menu_option=0;
 	struct Transaction cart;
 
-	cart.items=DS_new(
-		DS_bst,
+	cart.items=DS_new_bst(
 		sizeof(struct Product),
 		false,
-		&cmp_product,
-		&cmp_prod_key
+		&prod_key,
+		&cmp_product
 	);
 
 	// get customer information
@@ -144,6 +143,8 @@ void customer_menu(DS prod_list, DS trans_list){
 				puts("There are still items in your cart. Are you sure you want to leave (y/n)?");
 				if (prompt() != 'y') menu_option=0;
 			}
+		
+		default: break;
 		}
 	} while (menu_option != 7);
 	
@@ -181,6 +182,7 @@ int cart_menu(Trans cart, DS prod_list, DS trans_list){
 		case 2: // Checkout
 			if(checkout(cart, prod_list, trans_list) == EXIT_SUCCESS)
 				return EXIT_SUCCESS; // Sale :D
+		default: break;
 		}
 	} while (menu_option != 3);
 	return EXIT_FAILURE; // No Sale :(
@@ -211,7 +213,7 @@ void update_cart(Trans cart){
 	
 	if(DS_isempty(cart->items)) return;
 	
-	product=DS_first(cart->items);
+	product=(Prod)DS_first(cart->items);
 	do{
 		// if there are 0 units we remove the item
 		if (product->num_unit <1){
@@ -219,9 +221,9 @@ void update_cart(Trans cart){
 			goto restart;
 			// traversals must be restarted after a removal
 		}
-		else cart->pay += product->price * product->num_unit;
+		else cart->pay += product->price * (float)product->num_unit;
 		
-	} while (( product = DS_next(cart->items) ));
+	} while (( product = (Prod)DS_next(cart->items) ));
 }
 
 /************************************************************/
@@ -244,11 +246,11 @@ void searchByName(DS prodList){
 	puts("\nResults:");
 	print_prod_heading(stdout);
 
-	product=DS_first(prodList);
+	product=(Prod)DS_first(prodList);
 	do {
 		if(strstr(product->name, search_term) != NULL)
 			print_product(stdout, product);
-	} while (( product = DS_next(prodList) ));
+	} while (( product = (Prod)DS_next(prodList) ));
 
 	free(search_term);
 }
@@ -260,7 +262,7 @@ void searchByName(DS prodList){
 //      data.h:     DS_find()
 //                  DS_first()
 //                  DS_next()
-//                  DS_sort()
+//                  DS_insert()
 //      services.c: print_prod_heading()
 //                  print_product()
 
@@ -275,7 +277,7 @@ void add_to_cart(Trans cart, DS prod_list){
 	input = grabword(stdin);
 
 	// Find the Product
-	prod_rec=DS_find(prod_list, input);
+	prod_rec=(Prod)DS_find(prod_list, input);
 	if (prod_rec == NULL){
 		printf("\nThat Product Does not Exist\n");
 		return;
@@ -313,7 +315,7 @@ void add_to_cart(Trans cart, DS prod_list){
 	new_item.price    = prod_rec->price;
 	new_item.num_unit = num_unit;
 
-	DS_sort(cart->items, &new_item);
+	DS_insert(cart->items, &new_item);
 }
 
 
@@ -335,14 +337,14 @@ void edit_item(Trans cart, DS prod_list){
 	input = grabword(stdin);
 
 	// find the item
-	item=DS_find(cart->items, input);
+	item=(Prod)DS_find(cart->items, input);
 	if (item == NULL){
 		printf("\nThat Product is not in your cart.\n");
 		return;
 	}
 
 	// Find the Product
-	prod_rec=DS_find(prod_list, input);
+	prod_rec=(Prod)DS_find(prod_list, input);
 
 	print_prod_heading(stdout);
 	print_product(stdout, item);
@@ -383,11 +385,12 @@ int checkout(Trans cart, DS prod_list, DS xaction_list){
 		return EXIT_FAILURE;
 
 	// Update the product list
-	item = DS_first(cart->items);
+	item = (Prod)DS_first(cart->items);
 	do{
-		product=DS_find(prod_list, item->ID); // find the corresponding product
+		// find the corresponding product
+		product=(Prod)DS_find(prod_list, item->ID); 
 		product->num_unit -= item->num_unit; // and change its quantity
-	} while (( item = DS_next(cart->items) ));
+	} while (( item = (Prod)DS_next(cart->items) ));
 
 	DS_push(xaction_list, cart);
 	return EXIT_SUCCESS;
@@ -410,7 +413,7 @@ void print_sorted(int (compare) (const void*, const void*), DS prod_list){
 	num_nodes=DS_count(prod_list);
 	
 	// create a new index
-	index=calloc(sizeof(Prod), num_nodes);
+	index=(Prod*)calloc(sizeof(Prod), num_nodes);
 	if (index == NULL) {
 		puts("malloc(): returned NULL");
 		return;
@@ -433,10 +436,14 @@ void print_sorted(int (compare) (const void*, const void*), DS prod_list){
 	free(index);
 }
 
+__attribute__((const))
 int by_qty (const void* first, const void* second){
 	return (*(Prod*) second)->num_unit - (*(Prod*) first)->num_unit;
 }
 
+__attribute__((const))
 int by_price (const void* first, const void* second){
-	return (*(Prod*) second)->price - (*(Prod*) first)->price;
+	return (int) ((*(Prod*) second)->price - (*(Prod*) first)->price);
 }
+
+

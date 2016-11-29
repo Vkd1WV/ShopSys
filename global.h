@@ -98,8 +98,8 @@ typedef struct Transaction* Trans;
 // prototypes have to be here
 
 // In services.c
-int cmp_product (const void * left, const void * right);
-int cmp_prod_key(const void * key , const void * product);
+int          cmp_product(const void * left, const void * right);
+const void * prod_key   (const void * product);
 
 int  prompt            (void        );
 void print_product_list(DS          );

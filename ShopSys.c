@@ -90,13 +90,7 @@ int main (int argc, const char **argv){
 		return EXIT_FAILURE;
 	
 	// Create an empty transaction list
-	transaction_list=DS_new(
-		DS_list,
-		sizeof(struct Transaction),
-		true,
-		NULL,
-		NULL
-	);
+	transaction_list=DS_new_list(sizeof(struct Transaction));
 	
 	// The Main Menu
 	do {
@@ -117,6 +111,7 @@ int main (int argc, const char **argv){
 		case 2:
 			customer_menu(product_list, transaction_list);
 			break;
+		default: break;
 		}
 		
 	} while (menu_option != 3);
@@ -191,12 +186,11 @@ DS read_product_file(const char* file_name){
 	// make a link list to contain product data.
 	// Link list implementation provided by data.h
 	
-	product_list=DS_new(
-		DS_bst                ,
+	product_list=DS_new_bst(
 		sizeof(struct Product),
 		false                 ,
-		&cmp_product          ,
-		&cmp_prod_key
+		&prod_key          ,
+		&cmp_product
 	);
 	
 	while ( !feof(product_fd) ) { // check for end of file
@@ -206,7 +200,7 @@ DS read_product_file(const char* file_name){
 			break;
 		
 		// add it to the DS
-		if(DS_sort(product_list, new_prod_rec)){
+		if(DS_insert(product_list, new_prod_rec)){
 			puts("read_product_file():ERROR in adding data to sorted DS");
 			return NULL;
 		}
@@ -227,7 +221,7 @@ Prod read_product(FILE* file){
 	char* temp;
 	
 	// Allocate memory
-	prod_rec=malloc(sizeof(struct Product));
+	prod_rec=(Prod)malloc(sizeof(struct Product));
 	if ( prod_rec==NULL ) {
 		puts("read_product(): ERROR: malloc() returned NULL");
 		return NULL;
@@ -254,7 +248,7 @@ Prod read_product(FILE* file){
 		temp=grabword(file);
 	}
 	
-	prod_rec->price=atof(temp);
+	prod_rec->price=(float)atof(temp);
 	free(temp);
 
 	return prod_rec;
@@ -285,7 +279,7 @@ int write_product_file(const char* file_name, DS product_list){
 	
 	print_prod_heading(fd);
 	
-	while (( temp = DS_pop(product_list) )){
+	while (( temp = (Prod)DS_pop(product_list) )){
 		print_product(fd, temp);
 	}
 	
@@ -315,7 +309,7 @@ int append_transaction_file(const char* file_name, DS xaction_list){
 		return EXIT_FAILURE;
 	}
 	
-	while (( temp = DS_pop(xaction_list) )){
+	while (( temp = (Trans)DS_pop(xaction_list) )){
 		print_xaction(fd, temp);
 	}
 	

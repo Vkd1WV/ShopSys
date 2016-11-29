@@ -119,7 +119,7 @@ void owner_menu(DS prod_list, DS xaction_list){
 				clear_xactions(xaction_list);
 				fclose(fopen(DEFAULT_XACTION_FILE, "w"));
 			}else puts("Canceling...");
-			
+		default: break;
 		}
 	} while (menu_option != 9);
 }
@@ -160,7 +160,7 @@ void add_product(DS prod_list){
 	printf("\nEnter new Product ID:");
 	new_product.ID=grabword(stdin);
 	
-	if (( product = DS_find(prod_list, new_product.ID) )){
+	if (( product = (Prod)DS_find(prod_list, new_product.ID) )){
 	// make sure the product ID is unique
 		puts("That Product ID is already in Use:");
 		print_prod_heading(stdout);
@@ -174,14 +174,14 @@ void add_product(DS prod_list){
 	new_product.name=grabline(stdin);
 	printf("Enter new Product price:");
 	temp = grabword(stdin);
-	new_product.price = atof(temp);
+	new_product.price = (float)atof(temp);
 	free(temp);
 	printf("Enter new Product Quantity on hand:");
 	temp=grabword(stdin);
 	new_product.num_unit = atoi(temp);
 	free(temp);
 	
-	if( !DS_sort(prod_list, &new_product) ){
+	if( DS_insert(prod_list, &new_product) ){
 		print_prod_heading(stdout);
 		print_product(stdout, &new_product);
 	}
@@ -206,7 +206,7 @@ void delete_product(DS prod_list){
 	printf("Enter the ID of the Product to Delete: ");
 	prod_id=grabword(stdin);
 	
-	prod_rec=DS_find(prod_list, prod_id);
+	prod_rec=(Prod)DS_find(prod_list, prod_id);
 	
 	if (prod_rec == NULL){
 		printf("\nThat Product Does not Exist\n");
@@ -244,7 +244,7 @@ void edit_product(DS prod_list){
 	printf("Enter the ID of the Product to Edit: ");
 	input=grabword(stdin);
 	
-	prod_rec=DS_find(prod_list, input);
+	prod_rec=(Prod)DS_find(prod_list, input);
 	
 	if (prod_rec == NULL){
 		printf("\nThat Product Does not Exist\n");
@@ -276,8 +276,9 @@ void edit_product(DS prod_list){
 			printf("Enter the new Price:");
 			
 			input=grabword(stdin);
-			prod_rec->price=atof(input);
+			prod_rec->price=(float)atof(input);
 			free(input);
+		default: break;
 		}
 	} while (menu_option != 3);
 }
@@ -297,10 +298,10 @@ void print_transaction_list(DS xaction_list){
 	if (DS_isempty(xaction_list))
 		puts("No Recent Transactions.");
 	else {
-		xaction = DS_first(xaction_list);
+		xaction = (Trans)DS_first(xaction_list);
 		do {
 			print_xaction(stdout, xaction);
-		} while (( xaction = DS_next(xaction_list) ));
+		} while (( xaction = (Trans)DS_next(xaction_list) ));
 	}
 }
 
@@ -314,7 +315,7 @@ void print_transaction_list(DS xaction_list){
 
 
 void clear_xactions(DS xaction_list){
-	Trans temp;
+	//Trans temp;
 	
 	if(DS_isempty(xaction_list)){
 		puts("There are no Outstanding Transactions");
@@ -329,7 +330,7 @@ void clear_xactions(DS xaction_list){
 		return;
 	}
 	
-	while(( temp = DS_pop(xaction_list) )) free(temp);
+	while(( DS_pop(xaction_list) ));
 	return;
 }
 

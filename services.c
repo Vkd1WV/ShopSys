@@ -60,12 +60,14 @@
 //                 A COMPARATOR FUNCTION
 /************************************************************/
 
+__attribute__((const))
 int cmp_product(const void * left, const void * right){
-	return strcmp( ((Prod)left)->ID, ((Prod)right)->ID );
+	return strcmp( (char*)left, (char*)right );
 }
 
-int cmp_prod_key(const void * key, const void * product){
-	return strcmp( (char*) key, ((Prod)product)->ID );
+__attribute__((const))
+const void * prod_key(const void * product){
+	return ((Prod)product)->ID;
 }
 
 /************************************************************/
@@ -99,10 +101,10 @@ void print_product_list(DS prod_list){
 	
 	print_prod_heading(stdout);
 	
-	product=DS_first(prod_list);
+	product=(Prod)DS_first(prod_list);
 	do{
 		print_product(stdout, product);
-	} while (( product = DS_next(prod_list) ));
+	} while (( product = (Prod)DS_next(prod_list) ));
 }
 
 /************************************************************/
@@ -159,10 +161,10 @@ void print_xaction(FILE* file, Trans t){
 		fputs("\tYour cart is empty\n", file);
 	else{
 		print_prod_heading(file);
-		item=DS_first(t->items);
+		item=(Prod)DS_first(t->items);
 		do{
 			print_product(file, item);
-		} while (( item = DS_next(t->items) ));
+		} while (( item = (Prod)DS_next(t->items) ));
 	}
 	fprintf(file,
 			"========\t==============================\t========\t==========\n");
