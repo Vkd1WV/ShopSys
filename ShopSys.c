@@ -200,7 +200,7 @@ DS read_product_file(const char* file_name){
 			break;
 		
 		// add it to the DS
-		if(DS_insert(product_list, new_prod_rec)){
+		if(!DS_insert(product_list, new_prod_rec)){
 			puts("read_product_file():ERROR in adding data to sorted DS");
 			return NULL;
 		}

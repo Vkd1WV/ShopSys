@@ -185,7 +185,7 @@ void add_product(DS prod_list){
 		print_prod_heading(stdout);
 		print_product(stdout, &new_product);
 	}
-	else puts ("something went wrong");
+	else puts ("ERROR: add_product(): something went wrong");
 }
 
 /************************************************************/

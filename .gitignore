@@ -1,0 +1,6 @@
+# object files
+*.o
+
+# other
+*.pdf
+product0.txt
